@@ -47,8 +47,8 @@ COIN=FLOW
 endif
 
 APPVERSION_M=0
-APPVERSION_N=9
-APPVERSION_P=12
+APPVERSION_N=11
+APPVERSION_P=0
 
 $(info COIN  = [$(COIN)])
 ifeq ($(COIN),FLOW)
@@ -78,6 +78,7 @@ else
 APP_LOAD_PARAMS = --appFlags 0x000
 endif
 APP_LOAD_PARAMS += --delete $(COMMON_LOAD_PARAMS) --path ${APPPATH} --path "44'/1'"
+APP_LOAD_PARAMS += --curve secp256r1 --curve secp256k1
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 ICONNAME:=$(CURDIR)/nanos_icon.gif
@@ -121,7 +122,6 @@ endif
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 DEFINES       += IO_SEPROXYHAL_BUFFER_SIZE_B=128
-DEFINES       += COMPLIANCE_UX_160 HAVE_UX_LEGACY
 else
 # Assume Nano X/S+
 DEFINES       += IO_SEPROXYHAL_BUFFER_SIZE_B=300
@@ -178,6 +178,22 @@ LDLIBS   += -lm -lgcc -lc
 GLYPH_SRC_DIR = glyphs
 INCLUDES_PATH += $(MY_DIR)/glyphs
 include $(BOLOS_SDK)/Makefile.glyphs
+
+.PHONY: copy_app_icon
+copy_app_icon:
+	$(info Replacing app icon)
+	cp $(ICONNAME) glyphs/icon_app.gif
+
+.PHONY: delete_app_icon
+delete_app_icon:
+	$(info Deleting app icon)
+	rm -rf glyphs/icon_app.gif
+
+#before generating glyph files we need to copy app icon
+$(GLYPH_DESTH):  copy_app_icon
+
+#deleting app icon is a part of clean
+clean:  delete_app_icon
 
 APP_SOURCE_PATH += $(MY_DIR)/src
 APP_SOURCE_PATH += $(MY_DIR)/../deps/ledger-zxlib/include
