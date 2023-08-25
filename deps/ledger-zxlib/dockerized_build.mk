@@ -60,8 +60,8 @@ export MAKE_NVM_SH_PATH=~
 endif
 
 # Note: This is not an SSH key, and being public represents no risk
-SCP_PUBKEY=049bc79d139c70c83a4b19e8922e5ee3e0080bb14a2e8b0752aa42cda90a1463f689b0fa68c1c0246845c2074787b649d0d8a6c0b97d4607065eee3057bdf16b83
-SCP_PRIVKEY=ff701d781f43ce106f72dc26a46b6a83e053b5d07bb3d4ceab79c91ca822a66b
+SCP_PUBKEY=04165db7cd22d6af8429b605a216d4c0ead4879f2fb624f3114577b9380cd1fc710a45d6347d7ee145a8e6f6ebd759d7fecaa334a1add98638d2ad07ff1a483736
+SCP_PRIVKEY=8132922ab88f228dbdd05aa9717fb9667c0bea1d77a901949382b3b1ef4cdf0b
 
 INTERACTIVE:=$(shell [ -t 0 ] && echo 1)
 USERID:=$(shell id -u)
@@ -268,17 +268,17 @@ speculos_port_5001_start: speculos_pull_container
 	$(call run_announce,$@)
 	$(call start_speculos_container,5001,40001,41001,/app/bin)
 
-.PHONY: speculos_port_5002_start 
+.PHONY: speculos_port_5002_start
 speculos_port_5002_start: speculos_pull_container
 	$(call run_announce,$@)
 	$(call start_speculos_container,5002,40002,41002,/app/bin)
 
-.PHONY: speculos_port_5003_start 
+.PHONY: speculos_port_5003_start
 speculos_port_5003_start: speculos_pull_container
 	$(call run_announce,$@)
 	$(call start_speculos_container,5003,40003,41003,/tests_speculos/backward_compatibility_test_biniaries/0-9-12/)
 
-.PHONY: speculos_port_5001_stop 
+.PHONY: speculos_port_5001_stop
 speculos_port_5001_stop:
 	$(call run_announce,$@)
 	$(call stop_speculos_container,5001)
@@ -342,15 +342,15 @@ speculos_port_5001_test_internal:
 .PHONY: speculos_port_5002_test_internal
 speculos_port_5002_test_internal:
 	$(call run_announce,$@)
-	$(call run_nodejs_test,5002,40002,test-slot-transaction-interaction.js)	
-	$(call run_nodejs_test,5002,40002,test-transaction-expert-mode.js)	
+	$(call run_nodejs_test,5002,40002,test-slot-transaction-interaction.js)
+	$(call run_nodejs_test,5002,40002,test-transaction-expert-mode.js)
 	$(call run_nodejs_test,5002,40002,test-transactions.js)
 	@echo "# ALL TESTS COMPLETED!" | tee -a $(TESTS_SPECULOS_DIR)/speculos-port-5002.log
 
 .PHONY: speculos_port_5003_test_internal
 speculos_port_5003_test_internal:
 	$(call run_announce,$@)
-	$(call run_nodejs_test,5003,40003,test-backward-compatibility-0-9-12.js)	
+	$(call run_nodejs_test,5003,40003,test-backward-compatibility-0-9-12.js)
 	@echo "# ALL TESTS COMPLETED!" | tee -a $(TESTS_SPECULOS_DIR)/speculos-port-5003.log
 
 .PHONY: speculos_port_5001_test
