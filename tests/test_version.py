@@ -29,8 +29,8 @@ def test_check_name_version(backend):
     print(f" Name: {app_name}")
     print(f" Version: {version}")
     # Check expected value
-    assert app_name == "app"
-    assert version == "1.33.7"
+    assert app_name == "Flow"
+    assert version == "0.11.0"
 
 
 def test_get_app_version(firmware, backend):
