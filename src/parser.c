@@ -41,7 +41,7 @@
 
 #define ARGUMENT_BUFFER_SIZE_STRING 256
 
-#define MAX_JSON_ARRAY_TOKEN_COUNT 64  
+#define MAX_JSON_ARRAY_TOKEN_COUNT 64
 
 parser_error_t parser_parse(parser_context_t *ctx, const uint8_t *data, size_t dataLen) {
     CHECK_PARSER_ERR(parser_init(ctx, data, dataLen))
@@ -171,7 +171,7 @@ parser_error_t parser_printChainID(const flow_payer_t *v,
 }
 
 parser_error_t parser_printArgument(const flow_argument_list_t *v,
-                                               uint8_t argIndex, char *expectedType, jsmntype_t jsonType,
+                                               uint8_t argIndex, const char *expectedType, jsmntype_t jsonType,
                                                char *outVal, uint16_t outValLen,
                                                __Z_UNUSED uint8_t pageIdx, uint8_t *pageCount) {
     MEMZERO(outVal, outValLen);
@@ -193,7 +193,7 @@ parser_error_t parser_printArgument(const flow_argument_list_t *v,
 
 
 parser_error_t parser_printArgumentOptionalDelegatorID(const flow_argument_list_t *v,
-                                               uint8_t argIndex, char *expectedType, jsmntype_t jsonType,
+                                               uint8_t argIndex, const char *expectedType, jsmntype_t jsonType,
                                                char *outVal, uint16_t outValLen,
                                                __Z_UNUSED uint8_t pageIdx, uint8_t *pageCount) {
     MEMZERO(outVal, outValLen);
@@ -211,7 +211,7 @@ parser_error_t parser_printArgumentOptionalDelegatorID(const flow_argument_list_
     if (valueTokenIndex == JSON_MATCH_VALUE_IDX_NONE) {
         if (outValLen < 5) {
             return PARSER_UNEXPECTED_BUFFER_END;
-        }         
+        }
         strncpy_s(outVal, "None", 5);
     }
     else {
@@ -491,7 +491,7 @@ parser_error_t parser_getItemAfterArguments(__Z_UNUSED const parser_context_t *c
     if (app_mode_expert() && displayIdx-- == 0) {
         snprintf(outKey, outKeyLen, "Your Path");
         char buffer[100];
-        path_options_to_string(buffer, sizeof(buffer), hdPath.data, HDPATH_LEN_DEFAULT, cryptoOptions); 
+        path_options_to_string(buffer, sizeof(buffer), hdPath.data, HDPATH_LEN_DEFAULT, cryptoOptions);
         pageString(outVal, outValLen, buffer, pageIdx, pageCount);
         return PARSER_OK;
     }
@@ -520,14 +520,14 @@ parser_error_t parser_getItemAfterArguments(__Z_UNUSED const parser_context_t *c
                 snprintf(outVal, outValLen, "No address stored on the device.");
                 return PARSER_OK;
             }
-            break; 
+            break;
         case SHOW_ADDRESS_HDPATHS_NOT_EQUAL:
             if (displayIdx-- == 0) {
                 snprintf(outKey, outKeyLen, "Warning:");
                 snprintf(outVal, outValLen, "Different address stored on device.");
                 return PARSER_OK;
             }
-            break; 
+            break;
         default:
             if (displayIdx-- == 0) {
                 snprintf(outKey, outKeyLen, "Warning:");
@@ -595,7 +595,7 @@ parser_error_t parser_getItemCreateAccount(const parser_context_t *ctx,
     displayIdx--;
 
     uint8_t pkCount = 0;
-    CHECK_PARSER_ERR(_countArgumentItems(&parser_tx_obj.arguments, 0, 
+    CHECK_PARSER_ERR(_countArgumentItems(&parser_tx_obj.arguments, 0,
                                          CREATE_ACCOUNT_MAX_PUB_KEYS, &pkCount));
     if (displayIdx < pkCount) {
         snprintf(outKey, outKeyLen, "Pub key %d", displayIdx + 1);
@@ -655,7 +655,7 @@ parser_error_t parser_getItemWithdrawUnlockedTokens(const parser_context_t *ctx,
             snprintf(outKey, outKeyLen, "ChainID");
             return parser_printChainID(&parser_tx_obj.payer,
                                        outVal, outValLen, pageIdx, pageCount);
-        case 2: 
+        case 2:
             snprintf(outKey, outKeyLen, "Amount");
             return parser_printArgument(&parser_tx_obj.arguments, 0,
                                         "UFix64", JSMN_STRING,
@@ -682,7 +682,7 @@ parser_error_t parser_getItemDepositUnlockedTokens(const parser_context_t *ctx,
             snprintf(outKey, outKeyLen, "ChainID");
             return parser_printChainID(&parser_tx_obj.payer,
                                        outVal, outValLen, pageIdx, pageCount);
-        case 2: 
+        case 2:
             snprintf(outKey, outKeyLen, "Amount");
             return parser_printArgument(&parser_tx_obj.arguments, 0,
                                         "UFix64", JSMN_STRING,
@@ -1294,10 +1294,10 @@ parser_error_t parser_getItemRegisterNodeSCO(const parser_context_t *ctx,
             break;
     }
     displayIdx -= 8;
-    
+
 
     uint8_t pkCount = 0;
-    CHECK_PARSER_ERR(_countArgumentOptionalItems(&parser_tx_obj.arguments, 6, 
+    CHECK_PARSER_ERR(_countArgumentOptionalItems(&parser_tx_obj.arguments, 6,
                                                 SCO03_REGISTER_NODE_MAX_PUB_KEYS, &pkCount))
     if (displayIdx < pkCount) {
         snprintf(outKey, outKeyLen, "Pub key %d", displayIdx + 1);
@@ -1339,10 +1339,10 @@ parser_error_t parser_getItemCreateMachineAccount(const parser_context_t *ctx,
             break;
     }
     displayIdx -= 3;
-    
+
 
     uint8_t pkCount = 0;
-    CHECK_PARSER_ERR(_countArgumentItems(&parser_tx_obj.arguments, 1, 
+    CHECK_PARSER_ERR(_countArgumentItems(&parser_tx_obj.arguments, 1,
                                          SCO04_CREATE_MACHINE_ACOUNT_MAX_PUB_KEYS, &pkCount));
     if (displayIdx < pkCount) {
         snprintf(outKey, outKeyLen, "Pub key %d", displayIdx + 1);
@@ -1974,7 +1974,7 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
             return parser_getItemAddNewKey(ctx, displayIdx, outKey, outKeyLen, outVal, outValLen, pageIdx,
                                            pageCount);
         case SCRIPT_TH01_WITHDRAW_UNLOCKED_TOKENS:
-            return parser_getItemWithdrawUnlockedTokens(ctx, displayIdx, outKey, outKeyLen, outVal, outValLen, 
+            return parser_getItemWithdrawUnlockedTokens(ctx, displayIdx, outKey, outKeyLen, outVal, outValLen,
                                                         pageIdx, pageCount);
         case SCRIPT_TH02_DEPOSIT_UNLOCKED_TOKENS:
             return parser_getItemDepositUnlockedTokens(ctx, displayIdx, outKey, outKeyLen, outVal, outValLen,
@@ -2013,88 +2013,88 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
             return parser_getItemDelegateNewTokens(ctx, displayIdx, outKey, outKeyLen, outVal, outValLen,
                                                    pageIdx, pageCount);
         case SCRIPT_TH20_RESTAKE_UNSTAKED_DELEGATED_TOKENS:
-            return parser_getItemRestakeUnstakedDelegatedTokens(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemRestakeUnstakedDelegatedTokens(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                 outValLen, pageIdx, pageCount);
         case SCRIPT_TH21_RESTAKE_REWARDED_DELEGATED_TOKENS:
-            return parser_getItemRestakeRewardedDelegatedTokens(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemRestakeRewardedDelegatedTokens(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                 outValLen, pageIdx, pageCount);
         case SCRIPT_TH22_UNSTAKE_DELEGATED_TOKENS:
-            return parser_getItemUnstakeDelegatedTokens(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemUnstakeDelegatedTokens(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                         outValLen, pageIdx, pageCount);
         case SCRIPT_TH23_WITHDRAW_UNSTAKED_DELEGATED_TOKENS:
-            return parser_getItemWithdrawUnstakedDelegatedTokens(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemWithdrawUnstakedDelegatedTokens(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_TH24_WITHDRAW_REWARDED_DELEGATED_TOKENS:
-            return parser_getItemWithdrawRewardedDelegatedTokens(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemWithdrawRewardedDelegatedTokens(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_TH25_UPDATE_NETWORKING_ADDRESS:
-            return parser_getItemUpdateNetworkingAddress(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemUpdateNetworkingAddress(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO01_SETUP_STAKING_COLLECTION:
-            return parser_getItemSetupStaingCollection(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemSetupStaingCollection(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO02_REGISTER_DELEGATOR:
-            return parser_getItemRegisterDelegatorSCO(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemRegisterDelegatorSCO(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO03_REGISTER_NODE:
-            return parser_getItemRegisterNodeSCO(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemRegisterNodeSCO(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO04_CREATE_MACHINE_ACCOUNT:
-            return parser_getItemCreateMachineAccount(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemCreateMachineAccount(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO05_REQUEST_UNSTAKING:
-            return parser_getItemRequestUnstaking(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemRequestUnstaking(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO06_STAKE_NEW_TOKENS:
-            return parser_getItemStakeNewTokensSCO(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemStakeNewTokensSCO(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO07_STAKE_REWARD_TOKENS:
-            return parser_getItemStakeRewardTokens(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemStakeRewardTokens(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO08_STAKE_UNSTAKED_TOKENS:
-            return parser_getItemStakeUnstakedTokens(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemStakeUnstakedTokens(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO09_UNSTAKE_ALL:
-            return parser_getItemUnstakeAll(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemUnstakeAll(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
-        case SCRIPT_SCO10_WITHDRAW_REWARD_TOKENS:                   
-            return parser_getItemWithdrawRewardTokensSCO(ctx, displayIdx, outKey, outKeyLen, outVal, 
+        case SCRIPT_SCO10_WITHDRAW_REWARD_TOKENS:
+            return parser_getItemWithdrawRewardTokensSCO(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO11_WITHDRAW_UNSTAKED_TOKENS:
-            return parser_getItemWithdrawUnstakedTokensSCO(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemWithdrawUnstakedTokensSCO(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO12_CLOSE_STAKE:
-            return parser_getItemCloseStake(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemCloseStake(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO13_TRANSFER_NODE:
-            return parser_getItemTransferNode(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemTransferNode(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO14_TRANSFER_DELEGATOR:
-            return parser_getItemTransferDelegator(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemTransferDelegator(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO15_WITHDRAW_FROM_MACHINE_ACCOUNT:
-            return parser_getItemWithdrawFromMachineAccount(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemWithdrawFromMachineAccount(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_SCO16_UPDATE_NETWORKING_ADDRESS:
-            return parser_getItemUpdateNetworkingAddressSCO(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemUpdateNetworkingAddressSCO(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_FUSD01_SETUP_FUSD_VAULT:
-            return parser_getItemSetupFUSDVault(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemSetupFUSDVault(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_FUSD02_TRANSFER_FUSD:
-            return parser_getItemTransferFUSD(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemTransferFUSD(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_TS01_SET_UP_TOPSHOT_COLLECTION:
-            return parser_getItemSetUpTopShotCollection(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemSetUpTopShotCollection(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_TS02_TRANSFER_TOP_SHOT_MOMENT:
-            return parser_getItemTransferTopShotMoment(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemTransferTopShotMoment(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_USDC01_SETUP_USDC_VAULT:
-            return parser_getItemSetupUSDCVault(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemSetupUSDCVault(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
         case SCRIPT_USDC02_TRANSFER_USDC:
-            return parser_getItemTransferUSDC(ctx, displayIdx, outKey, outKeyLen, outVal, 
+            return parser_getItemTransferUSDC(ctx, displayIdx, outKey, outKeyLen, outVal,
                                                                  outValLen, pageIdx, pageCount);
     }
 

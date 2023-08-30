@@ -172,11 +172,11 @@ __Z_INLINE uint32_t add_options_to_path(char *s, uint32_t max, uint16_t options)
     return written;
 }
 
-__Z_INLINE void path_options_to_string(char *s, uint32_t max, const uint32_t *path, uint8_t pathLen, uint16_t cryptoOptions) {
+__Z_INLINE void path_options_to_string(char *s, uint32_t max, const uint32_t *path, uint8_t pathLen, uint16_t crypto_options) {
     uint32_t len = bip32_to_str(s, max, path, pathLen);
     if (len != 0) {
-        add_options_to_path(s, max, cryptoOptions); 
-    }                    
+        add_options_to_path(s, max, crypto_options);
+    }
 }
 
 __Z_INLINE int8_t str_to_int8(const char *start, const char *end, char *error) {
@@ -413,9 +413,9 @@ __Z_INLINE void pageHexString(char *outValue, uint16_t outValueLen,
 
     if (pageIdx < *pageCount) {
         if (lastChunkLen > 0 && pageIdx == *pageCount - 1) {
-            array_to_hexstr(outValue, outValueLen, inValue + (pageIdx * availableLen), lastChunkLen); 
+            array_to_hexstr(outValue, outValueLen, inValue + (pageIdx * availableLen), lastChunkLen);
         } else {
-            array_to_hexstr(outValue, outValueLen, inValue + (pageIdx * availableLen), availableLen); 
+            array_to_hexstr(outValue, outValueLen, inValue + (pageIdx * availableLen), availableLen);
         }
     }
 }

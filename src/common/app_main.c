@@ -181,8 +181,8 @@ void app_init() {
 
     USB_power(0);
     USB_power(1);
-    view_idle_show(0, "Ready");
-    
+    view_idle_show(0, (char *)"Ready");
+
 #ifdef HAVE_BLE
     // Enable Bluetooth
     BLE_power(0, NULL);
