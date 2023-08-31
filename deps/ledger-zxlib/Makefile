@@ -16,16 +16,16 @@
 
 .PHONY: all deps build clean load delete check_python show_info_recovery_mode
 
-TESTS_SPECULOS_DIR?=$(CURDIR)/tests_speculos
-EXAMPLE_VUE_DIR?=$(CURDIR)/example_vue
-TESTS_JS_PACKAGE?=
-TESTS_JS_DIR?=
-TESTS_GENERATE_DIR?=$(CURDIR)/tests/generate-transaction-tests
+TESTS_SPECULOS_DIR?=$(REPO_DIR)/tests_speculos
+EXAMPLE_VUE_DIR?=$(REPO_DIR)/example_vue
+TESTS_JS_PACKAGE?="@onflow/ledger"
+TESTS_JS_DIR?=$(REPO_DIR)/js
+TESTS_GENERATE_DIR?=$(REPO_DIR)/tests/generate-transaction-tests
 
-LEDGER_SRC=$(CURDIR)/app
+LEDGER_SRC=$(REPO_DIR)
 DOCKER_APP_SRC=/project
 DOCKER_APP_SRC_NEW=/app
-DOCKER_APP_BIN=$(DOCKER_APP_SRC)/app/bin/app.elf
+DOCKER_APP_BIN=$(DOCKER_APP_SRC)/bin/app.elf
 
 SPECULOS_MODEL_SWITCH=nanos
 NANO_ICON_GIF=nanos_icon.gif
@@ -118,12 +118,12 @@ check_python:
 .PHONY: deps
 deps: check_python
 	@echo "Install dependencies"
-	$(CURDIR)/deps/ledger-zxlib/scripts/install_deps.sh
+	$(REPO_DIR)/deps/ledger-zxlib/scripts/install_deps.sh
 
 .PHONY: convert_icon
 convert_icon:
-	@convert $(LEDGER_SRC)/tmp.gif -monochrome -size 16x16 -depth 1 $(LEDGER_SRC)/nanos_icon.gif
-	@convert $(LEDGER_SRC)/nanos_icon.gif -crop 14x14+1+1 +repage -negate $(LEDGER_SRC)/nanox_icon.gif
+	@convert $(LEDGER_SRC)/icons/tmp.gif -monochrome -size 16x16 -depth 1 $(LEDGER_SRC)/icons/nanos_icon.gif
+	@convert $(LEDGER_SRC)/icons/nanos_icon.gif -crop 14x14+1+1 +repage -negate $(LEDGER_SRC)/icons/nanox_icon.gif
 
 .PHONY: pull_build_container
 pull_build_container:
@@ -248,8 +248,8 @@ endif
 
 .PHONY: speculos_pull_container
 speculos_pull_container:
-	docker pull ghcr.io/ledgerhq/speculos:sha-f430e51
-	docker image tag ghcr.io/ledgerhq/speculos:sha-f430e51 speculos
+	docker pull ghcr.io/ledgerhq/speculos:latest
+	docker image tag ghcr.io/ledgerhq/speculos:latest speculos
 
 .PHONY: speculos_install
 speculos_install: speculos_install_js_link speculos_pull_container
@@ -266,12 +266,12 @@ speculos_install: speculos_install_js_link speculos_pull_container
 .PHONY: speculos_port_5001_start
 speculos_port_5001_start: speculos_pull_container
 	$(call run_announce,$@)
-	$(call start_speculos_container,5001,40001,41001,/app/bin)
+	$(call start_speculos_container,5001,40001,41001,/bin)
 
 .PHONY: speculos_port_5002_start
 speculos_port_5002_start: speculos_pull_container
 	$(call run_announce,$@)
-	$(call start_speculos_container,5002,40002,41002,/app/bin)
+	$(call start_speculos_container,5002,40002,41002,/bin)
 
 .PHONY: speculos_port_5003_start
 speculos_port_5003_start: speculos_pull_container
@@ -302,7 +302,7 @@ generate_test_vectors:
 # Note: This error did occur once: docker: Error response from daemon: driver failed programming external connectivity on endpoint speculos-port-5002 (082ea92d039f260880bc264a2f6086e14c42d698f24ff5acbba422baa9c60b29): Error starting userland proxy: listen tcp 0.0.0.0:41002: bind: address already in use.
 # Note: Since we do not need to use the VNC for the tests, then remove this option and hope the error never shows up again: --vnc-port $(3)
 define start_speculos_container
-	docker run --detach --name speculos-port-$(1) --rm -it -v $(CURDIR)$(4):/speculos/app/bin --publish $(1):$(1) --publish $(2):$(2) --publish $(3):$(3) speculos --model $(SPECULOS_MODEL_SWITCH) --sdk $(SPECULOS_SDK) --seed "equip will roof matter pink blind book anxiety banner elbow sun young" --display headless --apdu-port $(2) --api-port $(1) ./app/bin/app.elf ; rm -f $(TESTS_SPECULOS_DIR)/speculos-port-$(1).log ; docker logs --follow speculos-port-$(1) 2>&1 | tee -a $(TESTS_SPECULOS_DIR)/speculos-port-$(1).log > /dev/null 2>&1 &
+	docker run --detach --name speculos-port-$(1) --rm -it -v $(REPO_DIR)$(4):/speculos/bin --publish $(1):$(1) --publish $(2):$(2) --publish $(3):$(3) speculos --model $(SPECULOS_MODEL_SWITCH) --seed "equip will roof matter pink blind book anxiety banner elbow sun young" --display headless --apdu-port $(2) --api-port $(1) ./bin/app.elf ; rm -f $(TESTS_SPECULOS_DIR)/speculos-port-$(1).log ; docker logs --follow speculos-port-$(1) 2>&1 | tee -a $(TESTS_SPECULOS_DIR)/speculos-port-$(1).log > /dev/null 2>&1 &
 	@perl -e 'use Time::HiRes; $$t1=Time::HiRes::time(); while(1){ $$o=`cat $(TESTS_SPECULOS_DIR)/speculos-port-$(1).log`; if($$o =~ m~Running on .*\:$(1)~s){ printf qq[# detected -- via log -- speculos listening after %f seconds; spy on emulated device via http://localhost:$(1)/\n], Time::HiRes::time() - $$t1; exit; } Time::HiRes::sleep(0.01); };'
 endef
 
