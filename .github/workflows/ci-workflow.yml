@@ -78,7 +78,7 @@ jobs:
           pip3 install conan
           conan profile detect
           export BOLOS_SDK=
-          make -C deps/ledger-zxlib/ cpp_test
+          make --no-print-directory -C deps/ledger-zxlib/ cpp_test
 
   job_speculos_nanos_tests_5001:
     name: NanoS Speculos 5001/3 tests
@@ -102,12 +102,12 @@ jobs:
       - name: install speculos
         run: |
           export BOLOS_SDK=
-          REPO_DIR=$(pwd) make -C deps/ledger-zxlib/ speculos_install
+          REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_install
 
       - name: Run tests
         run: |
-          REPO_DIR=$(pwd) make -C deps/ledger-zxlib/ speculos_port_5001_test
-          REPO_DIR=$(pwd) make -C deps/ledger-zxlib/ speculos_port_5003_test
+          TARGET_NAME=NANO_S REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_port_5001_test
+          TARGET_NAME=NANO_S REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_port_5003_test
 
       - name: Upload Speculos 5001s log
         uses: actions/upload-artifact@v2
@@ -142,11 +142,11 @@ jobs:
       - name: install speculos
         run: |
           export BOLOS_SDK=
-          REPO_DIR=$(pwd) make -C deps/ledger-zxlib/ speculos_install
+          REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_install
 
       - name: Run tests
         run: |
-          REPO_DIR=$(pwd) make -C deps/ledger-zxlib/ speculos_port_5002_test
+          TARGET_NAME=NANO_S REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_port_5002_test
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v2
@@ -176,11 +176,11 @@ jobs:
       - name: install speculos
         run: |
           export BOLOS_SDK=
-          REPO_DIR=$(pwd) make -C deps/ledger-zxlib/ speculos_install
+          REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_install
 
       - name: Run tests
         run: |
-          TARGET_DEVICE=NANO_X REPO_DIR=$(pwd) make -C deps/ledger-zxlib/ speculos_port_5001_test
+          TARGET_NAME=NANO_X REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_port_5001_test
 
       - name: Upload Speculos 5001s log
         uses: actions/upload-artifact@v2
@@ -210,11 +210,11 @@ jobs:
       - name: install speculos
         run: |
           export BOLOS_SDK=
-          REPO_DIR=$(pwd) make -C deps/ledger-zxlib/ speculos_install
+          REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_install
 
       - name: Run tests
         run: |
-          TARGET_DEVICE=NANO_X REPO_DIR=$(pwd) make -C deps/ledger-zxlib/ speculos_port_5002_test
+          TARGET_NAME=NANO_X REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_port_5002_test
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v2
@@ -244,11 +244,11 @@ jobs:
       - name: install speculos
         run: |
           export BOLOS_SDK=
-          REPO_DIR=$(pwd) make -C deps/ledger-zxlib/ speculos_install
+          REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_install
 
       - name: Run tests
         run: |
-          TARGET_DEVICE=NANO_SP REPO_DIR=$(pwd) make -C deps/ledger-zxlib/ speculos_port_5001_test
+          TARGET_NAME=NANO_SP REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_port_5001_test
 
       - name: Upload Speculos 5001s log
         uses: actions/upload-artifact@v2
@@ -278,11 +278,11 @@ jobs:
       - name: install speculos
         run: |
           export BOLOS_SDK=
-          REPO_DIR=$(pwd) make -C deps/ledger-zxlib/ speculos_install
+          REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_install
 
       - name: Run tests
         run: |
-          TARGET_DEVICE=NANO_SP REPO_DIR=$(pwd) make -C deps/ledger-zxlib/ speculos_port_5002_test
+          TARGET_NAME=NANO_SP REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_port_5002_test
 
       - name: Upload Speculos log
         uses: actions/upload-artifact@v2
