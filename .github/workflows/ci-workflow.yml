@@ -1,46 +1,45 @@
 name: Compilation & tests
 
-on: [push, pull_request]
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - main
+      - develop
+  pull_request:
+
+env:
+  MAKE_OPT: --no-print-directory -C deps/ledger-zxlib/
 
 jobs:
   job_build_debug:
     name: Build debug
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg:
+          [
+            { device: "NANO_S", sdk: "$NANOS_SDK" },
+            { device: "NANO_X", sdk: "$NANOX_SDK" },
+            { device: "NANO_SP", sdk: "$NANOSP_SDK" },
+          ]
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
 
     steps:
       - name: Clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Build Nano S
+      - name: Build ${{ matrix.cfg.device }}
         run: |
           make clean
-          make DEBUG=1
-      - name: Upload app NanoS binary
-        uses: actions/upload-artifact@v2
+          make BOLOS_SDK=${{ matrix.cfg.sdk }} DEBUG=1
+      - name: Upload app binary
+        uses: actions/upload-artifact@v3
         with:
-          name: flow-app-debug-nanos
-          path: bin
-
-      - name: Build Nano X
-        run: |
-          make clean
-          TARGET_NAME=TARGET_NANOS BOLOS_SDK=$NANOX_SDK make DEBUG=1
-      - name: Upload app Nano X binary
-        uses: actions/upload-artifact@v2
-        with:
-          name: flow-app-debug-nanox
-          path: bin
-
-      - name: Build Nano S+
-        run: |
-          make clean
-          TARGET_NAME=TARGET_NANOS2 BOLOS_SDK=$NANOSP_SDK make DEBUG=1
-      - name: Upload app Nano S+ binary
-        uses: actions/upload-artifact@v2
-        with:
-          name: flow-app-debug-nanosp
+          name: flow-app-debug-${{ matrix.cfg.device }}
           path: bin
 
   job_scan_build:
@@ -52,13 +51,13 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build with Clang Static Analyzer
         run: |
           make clean
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: scan-build
@@ -71,221 +70,53 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build and run unit tests
         run: |
           pip3 install conan
           conan profile detect
           export BOLOS_SDK=
-          make --no-print-directory -C deps/ledger-zxlib/ cpp_test
+          make ${{ env.MAKE_OPT}} cpp_test
 
-  job_speculos_nanos_tests_5001:
-    name: NanoS Speculos 5001/3 tests
+  job_speculos_tests:
+    name: Speculos tests
     needs: job_build_debug
+    strategy:
+      fail-fast: false
+      matrix:
+        device: ["NANO_S", "NANO_X", "NANO_SP"]
+        port: ["5001", "5002"]
+        include:
+          - device: NANO_S
+            port: "5003"
     runs-on: ubuntu-latest
 
     steps:
       - name: Clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: 16.10.0
 
       - name: Download app binary
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
-          name: flow-app-debug-nanos
+          name: flow-app-debug-${{ matrix.device }}
           path: bin
 
       - name: install speculos
         run: |
           export BOLOS_SDK=
-          REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_install
+          make ${{ env.MAKE_OPT}} speculos_install
 
       - name: Run tests
         run: |
-          TARGET_NAME=NANO_S REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_port_5001_test
-          TARGET_NAME=NANO_S REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_port_5003_test
+          make ${{ env.MAKE_OPT}} TARGET_NAME=${{ matrix.device }} speculos_port_${{ matrix.port }}_test
 
-      - name: Upload Speculos 5001s log
-        uses: actions/upload-artifact@v2
+      - name: Upload log
+        uses: actions/upload-artifact@v3
         with:
-          name: speculos-5001s-log
-          path: tests_speculos/speculos-port-5001.log
-      - name: Upload Speculos 5003s log
-        uses: actions/upload-artifact@v2
-        with:
-          name: speculos-5001s-log
-          path: tests_speculos/speculos-port-5003.log
-
-  job_speculos_nanos_tests_5002:
-    name: NanoS Speculos 5002 tests
-    needs: job_build_debug
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Clone
-        uses: actions/checkout@v2
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.10.0
-
-      - name: Download app binary
-        uses: actions/download-artifact@v2
-        with:
-          name: flow-app-debug-nanos
-          path: bin
-
-      - name: install speculos
-        run: |
-          export BOLOS_SDK=
-          REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_install
-
-      - name: Run tests
-        run: |
-          TARGET_NAME=NANO_S REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_port_5002_test
-
-      - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
-        with:
-          name: speculos-5002s-log
-          path: tests_speculos/speculos-port-5002.log
-
-  job_speculos_nanox_tests_5001:
-    name: NanoX Speculos 5001 tests
-    needs: job_build_debug
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Clone
-        uses: actions/checkout@v2
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.10.0
-
-      - name: Download app binary
-        uses: actions/download-artifact@v2
-        with:
-          name: flow-app-debug-nanox
-          path: bin
-
-      - name: install speculos
-        run: |
-          export BOLOS_SDK=
-          REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_install
-
-      - name: Run tests
-        run: |
-          TARGET_NAME=NANO_X REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_port_5001_test
-
-      - name: Upload Speculos 5001s log
-        uses: actions/upload-artifact@v2
-        with:
-          name: speculos-5001x-log
-          path: tests_speculos/speculos-port-5001.log
-
-  job_speculos_nanox_tests_5002:
-    name: NanoX Speculos 5002 tests
-    needs: job_build_debug
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Clone
-        uses: actions/checkout@v2
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.10.0
-
-      - name: Download app binary
-        uses: actions/download-artifact@v2
-        with:
-          name: flow-app-debug-nanox
-          path: bin
-
-      - name: install speculos
-        run: |
-          export BOLOS_SDK=
-          REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_install
-
-      - name: Run tests
-        run: |
-          TARGET_NAME=NANO_X REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_port_5002_test
-
-      - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
-        with:
-          name: speculos-5002x-log
-          path: tests_speculos/speculos-port-5002.log
-
-  job_speculos_nanosp_tests_5001:
-    name: NanoS+ Speculos 5001 tests
-    needs: job_build_debug
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Clone
-        uses: actions/checkout@v2
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.10.0
-
-      - name: Download app binary
-        uses: actions/download-artifact@v2
-        with:
-          name: flow-app-debug-nanosp
-          path: bin
-
-      - name: install speculos
-        run: |
-          export BOLOS_SDK=
-          REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_install
-
-      - name: Run tests
-        run: |
-          TARGET_NAME=NANO_SP REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_port_5001_test
-
-      - name: Upload Speculos 5001s log
-        uses: actions/upload-artifact@v2
-        with:
-          name: speculos-5001sp-log
-          path: tests_speculos/speculos-port-5001.log
-
-  job_speculos_nanosp_tests_5002:
-    name: NanoS+ Speculos 5002 tests
-    needs: job_build_debug
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Clone
-        uses: actions/checkout@v2
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.10.0
-
-      - name: Download app binary
-        uses: actions/download-artifact@v2
-        with:
-          name: flow-app-debug-nanosp
-          path: bin
-
-      - name: install speculos
-        run: |
-          export BOLOS_SDK=
-          REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_install
-
-      - name: Run tests
-        run: |
-          TARGET_NAME=NANO_SP REPO_DIR=$(pwd) make --no-print-directory -C deps/ledger-zxlib/ speculos_port_5002_test
-
-      - name: Upload Speculos log
-        uses: actions/upload-artifact@v2
-        with:
-          name: speculos-5002sp-log
-          path: tests_speculos/speculos-port-5002.log
+          name: speculos-${{ matrix.device }}-${{ matrix.port }}-log
+          path: tests_speculos/speculos-port-${{ matrix.port }}.log
