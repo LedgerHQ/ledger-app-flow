@@ -149,7 +149,7 @@ zxerr_t digest_message(const uint8_t *message, uint16_t messageLen, digest_type_
     }
 }
 
-zxerr_t crypto_sign(const hd_path_t path, const uint16_t options, const uint8_t *message, uint16_t messageLen, uint8_t *buffer, uint16_t bufferSize,  uint16_t *sigSize) {    
+zxerr_t crypto_sign(const hd_path_t path, const uint16_t options, const uint8_t *message, uint16_t messageLen, uint8_t *buffer, uint16_t bufferSize,  uint16_t *sigSize) {
     zemu_log_stack("crypto_sign");
 
     cx_curve_t curve = get_cx_curve(options);
@@ -159,12 +159,12 @@ zxerr_t crypto_sign(const hd_path_t path, const uint16_t options, const uint8_t 
     }
 
     const digest_type_e cx_hash_kind = get_hash_type(options);
-    
+
     uint8_t messageDigest[32];
     uint16_t messageDigestSize = 0;
 
     CHECK_ZXERR(digest_message(message, messageLen, cx_hash_kind, messageDigest, sizeof(messageDigest), &messageDigestSize));
-    
+
     if (messageDigestSize != 32) {
         zemu_log_stack("crypto_sign: zxerr_out_of_bounds");
         return zxerr_out_of_bounds;
@@ -178,7 +178,7 @@ zxerr_t crypto_sign(const hd_path_t path, const uint16_t options, const uint8_t 
 
     if (bufferSize < sizeof(signature_t)) {
         zemu_log_stack("crypto_sign: zxerr_buffer_too_small");
-        return zxerr_buffer_too_small;    
+        return zxerr_buffer_too_small;
     }
     signature_t *const signature = (signature_t *) buffer;
 

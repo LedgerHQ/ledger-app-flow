@@ -73,7 +73,7 @@ testcaseData_t ReadRawTestCase(const std::shared_ptr<Json::Value> &jsonSource, i
 
 testcaseData_t ReadTestCaseData(const std::shared_ptr<Json::Value> &jsonSource, int index) {
     testcaseData_t tcd = ReadRawTestCase(jsonSource, index);
-    // Anotate with expected ui output
+    // Annotate with expected ui output
     tcd.expected_ui_output = GenerateExpectedUIOutput(tcd);
     return tcd;
 }

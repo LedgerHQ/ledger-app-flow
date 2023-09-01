@@ -26,7 +26,7 @@ bool hasPubkey;
 uint8_t pubkey_to_display[SECP256_PK_LEN];
 
 //Small trick to avoid duplicated code here which was quite error prone:
-//displayIdx is either the index of page to display, or may be a negative integer. 
+//displayIdx is either the index of page to display, or may be a negative integer.
 //In the second case this is used to count the number of pages
 //If displayIdx is negative, all other values are undefined
 zxerr_t addr_getItem_internal(int8_t *displayIdx,
@@ -41,7 +41,7 @@ zxerr_t addr_getItem_internal(int8_t *displayIdx,
 
     SCREEN(hasPubkey) {
         snprintf(outKey, outKeyLen, "Pub Key");
-        // +1 is to skip 0x04 prefix that indicates uncompresed key 
+        // +1 is to skip 0x04 prefix that indicates uncompressed key
         pageHexString(outVal, outValLen, pubkey_to_display+1, sizeof(pubkey_to_display)-1, pageIdx, pageCount);
         return zxerr_ok;
     }
@@ -95,13 +95,13 @@ zxerr_t addr_getItem_internal(int8_t *displayIdx,
 
     SCREEN(show_address_yes) {
         #if defined(TARGET_NANOS)
-            array_to_hexstr(outKey, outKeyLen, address_to_display.data, sizeof(address_to_display.data)); 
+            array_to_hexstr(outKey, outKeyLen, address_to_display.data, sizeof(address_to_display.data));
             snprintf(outVal, outValLen, " using any Flow  blockch. explorer.");
         #else
             char buffer[2*sizeof(address_to_display.data)+1];
-            array_to_hexstr(buffer, sizeof(buffer), address_to_display.data, sizeof(address_to_display.data)); 
+            array_to_hexstr(buffer, sizeof(buffer), address_to_display.data, sizeof(address_to_display.data));
             snprintf(outVal, outValLen, "%s using any Flow blockchain explorer.", buffer);
-            snprintf(outKey, outKeyLen, ""); 
+            snprintf(outKey, outKeyLen, "");
         #endif
         return zxerr_ok;
     }

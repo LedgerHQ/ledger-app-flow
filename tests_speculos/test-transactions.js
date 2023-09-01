@@ -50,7 +50,7 @@ const exampleAddKeyBlob        = "f90186f9015eb86e7472616e73616374696f6e28707562
 		for (let j=0; j < sigAlgos.length; ++j ) {
 			for (let k=0; k < hashAlgos.length; ++k ) {
 				const testTitle = `basic sign: ${transactions[i].title} - ${sigAlgos[j].name} / ${hashAlgos[k].name}`; // e.g. basic sign: Transfer FLOW - secp256k1 / SHA-256
-				const scriptNameCombo = (scriptName + "." + testTitle).replace(new RegExp("([:/ \-]+)","gm"),"-").toLowerCase(); 
+				const scriptNameCombo = (scriptName + "." + testTitle).replace(new RegExp("([:/ \-]+)","gm"),"-").toLowerCase();
 				testCombo(scriptNameCombo);
 				const device = getButtonsAndSnapshots(scriptNameCombo, speculosConf);
 				await device.makeStartingScreenshot();
@@ -59,7 +59,7 @@ const exampleAddKeyBlob        = "f90186f9015eb86e7472616e73616374696f6e28707562
 					app,
 					transport,
 					device,
-					transactions[i].blob, 
+					transactions[i].blob,
 					sigAlgos[j],
 					hashAlgos[k],
 					13
@@ -76,7 +76,7 @@ const exampleAddKeyBlob        = "f90186f9015eb86e7472616e73616374696f6e28707562
 	for (var i=0; i < transactions.length; ++i ) {
 		if (transactions[i].chainID == "Mainnet") {
 			var testTitle = `staking sign: ${transactions[i].title} - ${ECDSA_P256.name} / ${SHA3_256.name}`; // e.g. staking sign: TH.01 - Withdraw Unlocked FLOW - p256 / SHA3-256
-			const scriptNameCombo = (scriptName + "." + testTitle).replace(new RegExp("([:/ \-]+)","gm"),"-").toLowerCase(); 
+			const scriptNameCombo = (scriptName + "." + testTitle).replace(new RegExp("([:/ \-]+)","gm"),"-").toLowerCase();
 			testCombo(scriptNameCombo);
 			const device = getButtonsAndSnapshots(scriptNameCombo, speculosConf);
 			await device.makeStartingScreenshot();

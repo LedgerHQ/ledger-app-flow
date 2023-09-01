@@ -151,4 +151,3 @@ noMoreAPDUs(transport);
 await transport.close()
 testEnd(scriptName);
 process.stdin.pause()
-

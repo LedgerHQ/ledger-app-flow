@@ -45,7 +45,7 @@ __Z_INLINE void handleGetPubkey(volatile uint32_t *flags, volatile uint32_t *tx,
     MEMZERO(pubkey_to_display, sizeof(pubkey_to_display));
     zxerr_t err = crypto_extractPublicKey(hdPath, cryptoOptions, pubkey_to_display, sizeof(pubkey_to_display));
     if (err !=  zxerr_ok) {
-        zemu_log_stack("Public key extraction erorr");
+        zemu_log_stack("Public key extraction error");
         THROW(APDU_CODE_UNKNOWN);
     }
     hasPubkey = true;
@@ -53,7 +53,7 @@ __Z_INLINE void handleGetPubkey(volatile uint32_t *flags, volatile uint32_t *tx,
     //We prepare apdu response, as of now, it is pubkey and pubkey in hex ...
     STATIC_ASSERT(sizeof(G_io_apdu_buffer) > SECP256_PK_LEN + 2*SECP256_PK_LEN+1, "IO Buffer too small");
     STATIC_ASSERT(sizeof(pubkey_to_display) == SECP256_PK_LEN, "Buffer too small");
-    memmove(G_io_apdu_buffer, pubkey_to_display, sizeof(pubkey_to_display)); 
+    memmove(G_io_apdu_buffer, pubkey_to_display, sizeof(pubkey_to_display));
     const uint16_t remainingLength = sizeof(G_io_apdu_buffer) - SECP256_PK_LEN;
     uint32_t len = array_to_hexstr((char *)(G_io_apdu_buffer + SECP256_PK_LEN), remainingLength, pubkey_to_display, sizeof(pubkey_to_display));
     if (len != 2*SECP256_PK_LEN) {
@@ -66,7 +66,7 @@ __Z_INLINE void handleGetPubkey(volatile uint32_t *flags, volatile uint32_t *tx,
         loadAddressCompareHdPathFromSlot();
         if (show_address == SHOW_ADDRESS_ERROR || show_address == SHOW_ADDRESS_NONE) {
             zemu_log_stack("Unknown slot error");
-            THROW(APDU_CODE_UNKNOWN);           
+            THROW(APDU_CODE_UNKNOWN);
         }
 
         view_review_init(addr_getItem, addr_getNumItems, app_reply_address);
@@ -95,7 +95,7 @@ __Z_INLINE void handleSign(volatile uint32_t *flags, volatile uint32_t *tx, uint
     }
 
     show_address = SHOW_ADDRESS_NONE;
-    loadAddressCompareHdPathFromSlot();    
+    loadAddressCompareHdPathFromSlot();
 
     //if we found matching hdPath on slot 0
     if (show_address == SHOW_ADDRESS_YES || show_address == SHOW_ADDRESS_YES_HASH_MISMATCH) {
@@ -103,7 +103,7 @@ __Z_INLINE void handleSign(volatile uint32_t *flags, volatile uint32_t *tx, uint
     }
     else {
         addressUsedInTx = 0;
-    }    
+    }
 
     CHECK_APP_CANARY()
     view_review_init(tx_getItem, tx_getNumItems, app_sign);

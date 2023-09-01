@@ -39,7 +39,7 @@ class SpyTransport {
 		const hex_len = len.toString(16).padStart(2, '0'); if (process.env.TEST_DEBUG >= 1) { console.log(humanTime() + " .send() len: 0x" + hex_len); } // e.g. 1d
 		const hex_pay = len ? pay.toString('hex') : ""   ; if (process.env.TEST_DEBUG >= 1) { console.log(humanTime() + " .send() pay: 0x" + hex_pay + " <- " + len + " bytes"); } // e.g. 0a00010203040506072c0000801b020080010200800000000000000000
 		const hexApduCommandViaMockTransport = ''.concat(hex_cla, hex_ins, hex_p1, hex_p2, hex_len, hex_pay); // e.g. 331200001d0a00010203040506072c0000801b020080010200800000000000000000
-		this.hexApduCommandOut.push(hexApduCommandViaMockTransport);		
+		this.hexApduCommandOut.push(hexApduCommandViaMockTransport);
 		console.log(humanTime() + " .send() // " + hexApduCommandViaMockTransport + " <-- this is the mockTransport.send() (read: fake send) function");
 
 		//Now we actually send
@@ -52,9 +52,9 @@ class SpyTransport {
 		}
 		testStep("     <", "APDU in");
 		const res = await sendPromise;
-		this.hexApduCommandIn.push(""+Buffer.from(res).toString("hex"));		
+		this.hexApduCommandIn.push(""+Buffer.from(res).toString("hex"));
 
-		return Buffer.from(res) 
+		return Buffer.from(res)
 	}
 
 	async waitForAPDU(cla, ins, p1) {

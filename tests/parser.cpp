@@ -140,4 +140,3 @@ TEST(parser, printOptionalPublicKeys) {
     EXPECT_STREQ(outValBuf, "84b1ecad1512a64e65e020164");
     EXPECT_THAT(pageCountVar, 4);
 }
-

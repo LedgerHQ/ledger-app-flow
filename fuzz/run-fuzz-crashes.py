@@ -37,5 +37,3 @@ for config in CONFIGS:
         error_code = subprocess.call(cmd, env=env)
         if error_code != 0:
             exit(error_code)
-
-

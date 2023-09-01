@@ -3,7 +3,7 @@
 
 IDIR=./src
 
-all: libjsmn.a 
+all: libjsmn.a
 
 libjsmn.a: jsmn.o
 	$(AR) rc $@ $^
@@ -40,4 +40,3 @@ clean:
 	rm -f jsondump
 
 .PHONY: all clean test
-

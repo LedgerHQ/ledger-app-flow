@@ -87,8 +87,6 @@ Each slot has the following structure
 | Path    | u32 (5) | Derivation Path       |
 | Options | byte(2) | Crypto options (LE)   |
 
-
-
 ---
 
 ## Command definition
@@ -190,13 +188,13 @@ Data is defined as:
 
 #### Response
 
-| Field       | Type           | Content     | Note                     |
-| ----------- | -------------- | ----------- | ------------------------ |
-| secp256k1 R | byte (32)      | Signature   |                          |
-| secp256k1 S | byte (32)      | Signature   |                          |
-| secp256k1 V | byte (1)       | Signature   |                          |
-| SIG         | byte (varible) | Signature   | DER format               |
-| SW1-SW2     | byte (2)       | Return code | see list of return codes |
+| Field       | Type            | Content     | Note                     |
+| ----------- | --------------- | ----------- | ------------------------ |
+| secp256k1 R | byte (32)       | Signature   |                          |
+| secp256k1 S | byte (32)       | Signature   |                          |
+| secp256k1 V | byte (1)        | Signature   |                          |
+| SIG         | byte (variable) | Signature   | DER format               |
+| SW1-SW2     | byte (2)        | Return code | see list of return codes |
 
 ---
 

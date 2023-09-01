@@ -22,17 +22,17 @@ let hexExpected = "";
 await device.makeStartingScreenshot();
 
 const paths = [
-    `m/44'/539'/0'/0/0`, 
-    `m/44'/539'/0'/0/${0x7FFFFFFF}`, 
-    `m/44'/539'/${0x7FFFFFFF}'/0/0`, 
+    `m/44'/539'/0'/0/0`,
+    `m/44'/539'/0'/0/${0x7FFFFFFF}`,
+    `m/44'/539'/${0x7FFFFFFF}'/0/0`,
     `m/44'/539'/${0x7FFFFFFF}'/0/${0x7FFFFFFF}`
 ];
 const optionsCurve = [FlowApp.Signature.SECP256K1, FlowApp.Signature.P256];
 const optionsHash = [FlowApp.Hash.SHA2_256, FlowApp.Hash.SHA3_256];
 const expectedPathHex = [
-    "2c0000801b020080000000800000000000000000", 
-    "2c0000801b02008000000080000000007FFFFFFF", 
-    "2c0000801b020080ffffffff0000000000000000", 
+    "2c0000801b020080000000800000000000000000",
+    "2c0000801b02008000000080000000007FFFFFFF",
+    "2c0000801b020080ffffffff0000000000000000",
     "2c0000801b020080ffffffff000000007FFFFFFF"
 ];
 const expectedCurveHex = ["03", "02"];

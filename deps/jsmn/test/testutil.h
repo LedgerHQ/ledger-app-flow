@@ -63,7 +63,7 @@ static int tokeq(const char *s, jsmntok_t *tokens, int numtok, ...) {
 	int ok;
 	va_list args;
 	va_start(args, numtok);
-	ok = vtokeq(s, tokens, numtok, args); 
+	ok = vtokeq(s, tokens, numtok, args);
 	va_end(args);
 	return ok;
 }
@@ -84,7 +84,7 @@ static int parse(const char *s, int status, int numtok, ...) {
 
 	if (status >= 0) {
 		va_start(args, numtok);
-		ok = vtokeq(s, t, numtok, args); 
+		ok = vtokeq(s, t, numtok, args);
 		va_end(args);
 	}
 	free(t);

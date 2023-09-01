@@ -1313,7 +1313,7 @@ parser_error_t parser_getItemRegisterNodeSCO(const parser_context_t *ctx,
 }
 
 //SCO.04
-#define SCO04_CREATE_MACHINE_ACOUNT_MAX_PUB_KEYS 3
+#define SCO04_CREATE_MACHINE_ACCOUNT_MAX_PUB_KEYS 3
 parser_error_t parser_getItemCreateMachineAccount(const parser_context_t *ctx,
                                        uint16_t displayIdx,
                                        char *outKey, uint16_t outKeyLen,
@@ -1343,7 +1343,7 @@ parser_error_t parser_getItemCreateMachineAccount(const parser_context_t *ctx,
 
     uint8_t pkCount = 0;
     CHECK_PARSER_ERR(_countArgumentItems(&parser_tx_obj.arguments, 1,
-                                         SCO04_CREATE_MACHINE_ACOUNT_MAX_PUB_KEYS, &pkCount));
+                                         SCO04_CREATE_MACHINE_ACCOUNT_MAX_PUB_KEYS, &pkCount));
     if (displayIdx < pkCount) {
         snprintf(outKey, outKeyLen, "Pub key %d", displayIdx + 1);
         CHECK_PARSER_ERR(

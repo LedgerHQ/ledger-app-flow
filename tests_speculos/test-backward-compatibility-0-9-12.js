@@ -35,7 +35,7 @@ const expected_pk = [
         "04d7482bbaff7827035d5b238df318b10604673dc613808723efbd23fbc4b9fad34a415828d924ec7b83ac0eddf22ef115b7c203ee39fb080572d7e51775ee54be",
         "04fab6ad32374b117678fda1932cf57c0e086a55753109c5265d7804a3122ef180251ef9cec48f8706ab229f19dbccb143c26fc2561ad18a9f8614b7418ec37ab2",
     ],
-    
+
     [
         "04db0a14364e5bf43a7ddda603522ddfee95c5ff12b48c49480f062e7aa9d20e84215eef9b8b76175f32802f75ed54110e29c7dc76054f24c028c312098e7177a3",
         "049ed0923564ab3f06a58300814b71836a6cf47d6da9e9f0f2ce2289b53a931ab63bfce9d876a6ec51a03493d29a8369aca27083ae89212f2c499ea5d45a82f693",
@@ -73,10 +73,10 @@ for (let i=0; i < sigAlgos.length; ++i ) {
         const getPubkeyResponse = await app.getAddressAndPubKey(path, options);
         assert.equal(getPubkeyResponse.returnCode, 0x9000);
         assert.equal(getPubkeyResponse.errorMessage, "No errors");
-        
+
         assert.equal(getPubkeyResponse.address.toString(), expected_pk[i][j]);
         assert.equal(getPubkeyResponse.publicKey.toString('hex'), expected_pk[i][j]);
-        
+
         compareGetVersionAPDUs(transport);
         hexExpected = "3301000014xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
         compareOutAPDU(transport, hexExpected, "apdu command", {cla:1, ins:1, p1:1, p2:1, len:1, do_not_compare_path:20, unexpected:9999});
@@ -91,11 +91,11 @@ for (let i=0; i < sigAlgos.length; ++i ) {
             app,
             transport,
             device,
-            exampleAddKeyBlob, 
+            exampleAddKeyBlob,
             sigAlgos[i],
             hashAlgos[j],
             12
-        ); 
+        );
     }
 }
 

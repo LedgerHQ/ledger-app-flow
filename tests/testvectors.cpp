@@ -46,7 +46,7 @@ void check_testcase(const testcase_t &testcase) {
     app_mode_set_expert(tc.expert);
 
     show_address = SHOW_ADDRESS_EMPTY_SLOT;
-    
+
 
 
     err = parser_parse(&ctx, tc.blob.data(), tc.blob.size());

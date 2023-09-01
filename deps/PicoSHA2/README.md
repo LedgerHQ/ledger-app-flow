@@ -119,7 +119,7 @@ std::string src_str = "The quick brown fox jumps over the lazy dog";
 //any STL sequantial containers (vector, list, dequeue...)
 std::vector<unsigned char> hash(32);
 
-// in: iterator pair, out: contaner
+// in: iterator pair, out: container
 picosha2::hash256(src_str.begin(), src_str.end(), hash);
 ```
 

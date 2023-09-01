@@ -3,7 +3,7 @@ const rlp = require("rlp");
 const fs = require("fs");
 const path = require("path");
 const {
-  encodeTransactionPayload, 
+  encodeTransactionPayload,
   encodeTransactionEnvelope,
 } = require("@onflow/encode");
 
@@ -23,14 +23,14 @@ const ADDRESSES = {
 
 const TX_HELLO_WORLD = `transaction(msg: String) { execute { log(msg) } }`;
 
-const TX_ADD_NEW_KEY = 
+const TX_ADD_NEW_KEY =
 `transaction(publicKey: String) {
 prepare(signer: AuthAccount) {
 signer.addPublicKey(publicKey.decodeHex())
 }
 }`;
 
-const TX_CREATE_ACCOUNT = 
+const TX_CREATE_ACCOUNT =
 `transaction(publicKeys: [String]) {
 prepare(signer: AuthAccount) {
 let acct = AuthAccount(payer: signer)
@@ -40,7 +40,7 @@ acct.addPublicKey(key.decodeHex())
 }
 }`;
 
-const TX_TRANSFER_TOKENS_EMULATOR = 
+const TX_TRANSFER_TOKENS_EMULATOR =
 `import FungibleToken from 0xee82856bf20e2aa6
 transaction(amount: UFix64, to: Address) {
 let vault: @FungibleToken.Vault
@@ -57,7 +57,7 @@ getAccount(to)
 }
 }`;
 
-const TX_TRANSFER_TOKENS_TESTNET = 
+const TX_TRANSFER_TOKENS_TESTNET =
 `import FungibleToken from 0x9a0766d93b6608b7
 transaction(amount: UFix64, to: Address) {
 let vault: @FungibleToken.Vault
@@ -74,7 +74,7 @@ getAccount(to)
 }
 }`;
 
-const TX_TRANSFER_TOKENS_MAINNET = 
+const TX_TRANSFER_TOKENS_MAINNET =
 `import FungibleToken from 0xf233dcee88fe0abe
 transaction(amount: UFix64, to: Address) {
 let vault: @FungibleToken.Vault
@@ -91,7 +91,7 @@ getAccount(to)
 }
 }`;
 
-const TX_REGISTER_NODE_SCO = 
+const TX_REGISTER_NODE_SCO =
 `import FlowStakingCollection from 0x8d0e87b65159ae63
 
 /// Registers a delegator in the staking collection resource
@@ -104,7 +104,7 @@ transaction(id: String,
             stakingKey: String,
             amount: UFix64,
             publicKeys: [String]?) {
-    
+
     let stakingCollectionRef: &FlowStakingCollection.StakingCollection
 
     prepare(account: AuthAccount) {
@@ -118,7 +118,7 @@ transaction(id: String,
             networkingKey: networkingKey,
             stakingKey: stakingKey,
             amount: amount,
-            payer: account) 
+            payer: account)
         {
             if publicKeys == nil || publicKeys!.length == 0 {
                 panic("Cannot provide zero keys for the machine account")
@@ -131,14 +131,14 @@ transaction(id: String,
 }
 `;
 
-const TX_CREATE_MACHINE_ACCOUNT_SCO = 
+const TX_CREATE_MACHINE_ACCOUNT_SCO =
 `import FlowStakingCollection from 0x8d0e87b65159ae63
 
 /// Creates a machine account for a node that is already in the staking collection
 /// and adds public keys to the new account
 
 transaction(nodeID: String, publicKeys: [String]) {
-    
+
     let stakingCollectionRef: &FlowStakingCollection.StakingCollection
 
     prepare(account: AuthAccount) {
@@ -251,7 +251,7 @@ const combineMerge = (target, source, options) => {
 
   return destination
 };
-  
+
 const buildPayloadTx = (network, partialTx) =>
   merge(basePayloadTx(network), partialTx, {arrayMerge: combineMerge});
 
@@ -293,24 +293,24 @@ const baseEnvelopeTx = (network) => {
 
 const createPayloadTestcase = (valid) => {
   return (x) => ({
-    title: x[0],	
-    valid: valid,	
-    chainID: x[2],	
-    payloadMessage: x[1],	
-    envelopeMessage: { ...x[1], payloadSigs: [] },	
-    encodedTransactionPayloadHex: encodeTransactionPayload(x[1]),	
+    title: x[0],
+    valid: valid,
+    chainID: x[2],
+    payloadMessage: x[1],
+    envelopeMessage: { ...x[1], payloadSigs: [] },
+    encodedTransactionPayloadHex: encodeTransactionPayload(x[1]),
     encodedTransactionEnvelopeHex: encodeTransactionEnvelope({ ...x[1], payloadSigs: [] }),
   });
 };
 
 const createEnvelopeTestcase = (valid) => {
-  return (x) => ({	
-    title: x[0],	
-    valid: valid,	
-    chainID: x[2],	
-    payloadMessage: x[1],	
-    envelopeMessage: { ...x[1], payloadSigs: [] },	
-    encodedTransactionPayloadHex: encodeTransactionPayload(x[1]),	
+  return (x) => ({
+    title: x[0],
+    valid: valid,
+    chainID: x[2],
+    payloadMessage: x[1],
+    envelopeMessage: { ...x[1], payloadSigs: [] },
+    encodedTransactionPayloadHex: encodeTransactionPayload(x[1]),
     encodedTransactionEnvelopeHex: encodeTransactionEnvelope({ ...x[1], payloadSigs: [] }),
   });
 };
@@ -329,8 +329,8 @@ const numberOfRequiredTests = (arguments) => {
 // Last sampleValue is used if sampleValuesIdx is too high.
 const selectArgumentCombinations = (transactionArguments) => {
   const maxSv = numberOfRequiredTests(transactionArguments);
-  return range(0, maxSv).map((sampleValuesIdx) => 
-    range(0, transactionArguments.length).map((i) => 
+  return range(0, maxSv).map((sampleValuesIdx) =>
+    range(0, transactionArguments.length).map((i) =>
       Math.min(sampleValuesIdx, transactionArguments[i].sampleValues.length-1)
     )
   );
@@ -343,20 +343,20 @@ const mainnetTemplates = JSON.parse(fs.readFileSync('manifest.mainnet.json')).te
 const manifestTestnetPayloadCases = testnetTemplates.flatMap((template) => {
   const combinations = selectArgumentCombinations(template.arguments);
   return combinations.map((combination, i) => [
-    (combinations.length==1)?`${template.id} - ${template.name}`: 
+    (combinations.length==1)?`${template.id} - ${template.name}`:
                              `${template.id} - ${template.name} - ${i+1}`,
     buildPayloadTx(TESTNET, {
       script: template.source,
       arguments: sampleArguments(template.arguments || [], combination),
-    }), 
-    TESTNET, 
+    }),
+    TESTNET,
   ])
 });
 
 const manifestMainnetPayloadCases = mainnetTemplates.flatMap((template) => {
   const combinations = selectArgumentCombinations(template.arguments);
   return combinations.map((combination, i) => [
-    (combinations.length==1)?`${template.id} - ${template.name}`: 
+    (combinations.length==1)?`${template.id} - ${template.name}`:
                              `${template.id} - ${template.name} - ${i+1}`,
     buildPayloadTx(MAINNET, {
       script: template.source,
@@ -369,7 +369,7 @@ const manifestMainnetPayloadCases = mainnetTemplates.flatMap((template) => {
 const manifestTestnetEnvelopeCases = testnetTemplates.flatMap((template) => {
   const combinations = selectArgumentCombinations(template.arguments);
   return combinations.map((combination, i) => [
-    (combinations.length==1)?`${template.id} - ${template.name}`: 
+    (combinations.length==1)?`${template.id} - ${template.name}`:
                              `${template.id} - ${template.name} - ${i+1}`,
     buildEnvelopeTx(TESTNET, {
       script: template.source,
@@ -382,7 +382,7 @@ const manifestTestnetEnvelopeCases = testnetTemplates.flatMap((template) => {
 const manifestMainnetEnvelopeCases = mainnetTemplates.flatMap((template) => {
   const combinations = selectArgumentCombinations(template.arguments);
   return combinations.map((combination, i) => [
-    (combinations.length==1)?`${template.id} - ${template.name}`: 
+    (combinations.length==1)?`${template.id} - ${template.name}`:
                              `${template.id} - ${template.name} - ${i+1}`,
     buildEnvelopeTx(MAINNET, {
       script: template.source,
@@ -574,11 +574,11 @@ const invalidPayloadCases = [
   ],
 ].map(createPayloadTestcase(false));
 
-const validPayloadTransferCases = 
+const validPayloadTransferCases =
   Object.entries(TXS_TRANSFER_TOKENS).
   reduce((list, [network, script]) => [
     ...list,
-    ...(FLOW_AMOUNTS.map((amount) => 
+    ...(FLOW_AMOUNTS.map((amount) =>
       [
         `Send Flow Token Transaction (${network}) - Valid Payload - Valid Amount ${amount}`,
         buildPayloadTx(network, {
@@ -598,7 +598,7 @@ const validPayloadTransferCases =
       ]
     )),
   ], []);
-  
+
 const validPayloadCases = [
   [
     "Example Transaction - Valid Payload - Zero Gas Limit",
@@ -649,7 +649,7 @@ const validPayloadCases = [
     MAINNET,
   ],
   ...validPayloadTransferCases,
-  ...(ACCOUNT_KEYS.map((accountKey, i) => 
+  ...(ACCOUNT_KEYS.map((accountKey, i) =>
     [
       `Create Account Transaction - Valid Payload - Single Account Key #${i}`,
       buildPayloadTx(MAINNET, {
@@ -669,7 +669,7 @@ const validPayloadCases = [
       MAINNET,
     ]
   )),
-  ...(range(1, 6).map((i) => 
+  ...(range(1, 6).map((i) =>
     [
       `Create Account Transaction - Valid Payload - Multiple Account Keys #${i}`,
       buildPayloadTx(MAINNET, {
@@ -689,7 +689,7 @@ const validPayloadCases = [
       MAINNET,
     ]
   )),
-  ...(ACCOUNT_KEYS.map((accountKey, i) => 
+  ...(ACCOUNT_KEYS.map((accountKey, i) =>
     [
       `Add New Key Transaction - Valid Envelope - Valid Account Key ${i}`,
       buildEnvelopeTx(MAINNET, {
@@ -741,7 +741,7 @@ const invalidEnvelopeCases = [
         "edc1ef3266719c68",
         "09a656ef778b9cb7",
         "e6ebddabaaf4e241",
-        
+
         "028c6476bb0ee29e",
       ],
     }),
@@ -749,11 +749,11 @@ const invalidEnvelopeCases = [
   ],
 ].map(createEnvelopeTestcase(false));
 
-const validEnvelopeTransferCases = 
+const validEnvelopeTransferCases =
   Object.entries(TXS_TRANSFER_TOKENS).
   reduce((list, [network, script]) => [
     ...list,
-    ...(FLOW_AMOUNTS.map((amount) => 
+    ...(FLOW_AMOUNTS.map((amount) =>
       [
         `Send Flow Token Transaction (${network}) - Valid Envelope - Valid Amount ${amount}`,
         buildEnvelopeTx(network, {
@@ -846,7 +846,7 @@ const validEnvelopeCases = [
     MAINNET,
   ],
   ...validEnvelopeTransferCases,
-  ...(ACCOUNT_KEYS.map((accountKey, i) => 
+  ...(ACCOUNT_KEYS.map((accountKey, i) =>
     [
       `Create Account Transaction - Valid Envelope - Single Account Key #${i}`,
       buildEnvelopeTx(MAINNET, {
@@ -866,7 +866,7 @@ const validEnvelopeCases = [
       MAINNET,
     ]
   )),
-  ...(range(1, 6).map((i) => 
+  ...(range(1, 6).map((i) =>
     [
       `Create Account Transaction - Valid Envelope - Multiple Account Keys #${i}`,
       buildEnvelopeTx(MAINNET, {
@@ -886,7 +886,7 @@ const validEnvelopeCases = [
       MAINNET,
     ]
   )),
-  ...(ACCOUNT_KEYS.map((accountKey, i) => 
+  ...(ACCOUNT_KEYS.map((accountKey, i) =>
     [
       `Add New Key Transaction - Valid Envelope - Valid Account Key ${i}`,
       buildEnvelopeTx(MAINNET, {

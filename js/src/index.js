@@ -272,7 +272,7 @@ export default class FlowApp {
 
     const serializedSlotIdx = Buffer.from([slotIdx]);
     const serializedAccount = Buffer.from(account, "hex");
-  
+
     const getVersionResponse = await this.getVersion();
     const pathSerializationVersion = (compareVersion(getVersionResponse, 0, 9, 12) <= 0) ? 0 : 1;
 

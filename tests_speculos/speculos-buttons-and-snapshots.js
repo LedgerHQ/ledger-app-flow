@@ -16,7 +16,7 @@ class ButtonsAndSnapshots {
 
 	flowReadySHA;
 	approveSHA;
-    
+
     constructor(scriptName, conf) {
         this.scriptName = scriptName;
         this.speculosButtonsPort = conf.speculosApiPort;
@@ -41,7 +41,7 @@ class ButtonsAndSnapshots {
 	}
 
 	async curlScreenShot(lastButton = "") {
-		const test_device = this.snapshotName; 
+		const test_device = this.snapshotName;
 		const originalScreenshotSHA = this.pngSha256Previous;
 		// e.g. test-transactions.staking-sign-ts.02-transfer-top-shot-moment-p256-sha3-256/nanos.01.png
 		const png = this.scriptName.replace(".js", "") + "/" + test_device + "." + this.pngNum.toString(10).padStart(2, '0') + ".png"
@@ -105,7 +105,7 @@ class ButtonsAndSnapshots {
 			// if we want to compare this screenshot
 			else {
 				this.pngSha256Previous = sha256Array[0];
-			
+
 				// if we have it, we are done
 				if (sha256Array[0] == sha256Array[1]) {
 					break;
@@ -161,9 +161,9 @@ class ButtonsAndSnapshots {
         console.log(humanTime() + " back to main screen");
     }
 
-    async toggleExpertMode(textWhat) {       
+    async toggleExpertMode(textWhat) {
         await this.curlButtonAndScreenshot("right", "Menu: Flow Ready -> Expert Mode");
-        await this.curlButtonAndScreenshot("both", "Toggle expert mode: " + textWhat);        
+        await this.curlButtonAndScreenshot("both", "Toggle expert mode: " + textWhat);
         await this.curlButtonAndScreenshot("left", "Menu: Flow Ready -> Expert Mode");
         console.log(humanTime() + " back to main screen");
     }
@@ -174,7 +174,7 @@ class ButtonsAndSnapshots {
         }
         await this.curlButtonAndScreenshot("both", "Enter Menu: "+textWhat);
         //When you enter menu element, you already made screenshot of first review screen
-        //This is necessary to confirm that the button click was catched by Speculos
+        //This is necessary to confirm that the button click was caught by Speculos
 		//Thus this workflow is slightly different then the review one...
         for(let i=1; i<max_review_screens; i++) {
             const sha = await this.curlButtonAndScreenshot("right", " Scroll "+textWhat+" [from screen "+i+" to "+(i+1)+"]");
@@ -210,7 +210,7 @@ class LedgerButtonsAndSnapshots {
 	async review(textWhat) {
 		await this.wait("Please, review the transaction on the device.")
 	}
-    async toggleExpertMode(textWhat) { 
+    async toggleExpertMode(textWhat) {
 		await this.wait("Please, toggle expert mode ("+textWhat+")")
 	}
     async enterMenuElementAndReview(menuElementIndex, textWhat) {

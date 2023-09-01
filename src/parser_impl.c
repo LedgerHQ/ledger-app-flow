@@ -64,7 +64,7 @@ const char *parser_getErrorDescription(parser_error_t err) {
         case PARSER_DISPLAY_PAGE_OUT_OF_RANGE:
             return "display_page_out_of_range";
         case PARSER_UNEXPECTED_ERROR:
-            return "Unexepected internal error";
+            return "Unexpected internal error";
             // Coin specific
         case PARSER_RLP_ERROR_INVALID_KIND:
             return "parser_rlp_error_invalid_kind";
@@ -749,7 +749,7 @@ parser_error_t _countArgumentItems(const flow_argument_list_t *v, uint8_t argume
     return PARSER_OK;
 }
 
-//if Optional is null, number_of_items is set to 1 as one screen is needed to dispay "None"
+//if Optional is null, number_of_items is set to 1 as one screen is needed to display "None"
 parser_error_t _countArgumentOptionalItems(const flow_argument_list_t *v, uint8_t argumentIndex,
                                            uint8_t max_number_of_items, uint8_t *number_of_items) {
     *number_of_items = 0;
@@ -769,7 +769,7 @@ parser_error_t _countArgumentOptionalItems(const flow_argument_list_t *v, uint8_
         return PARSER_OK;
     }
 
-    // Get numnber of items
+    // Get number of items
     uint16_t arrayTokenCount;
     CHECK_PARSER_ERR(array_get_element_count(&parsedJson, internalTokenElementIdx, &arrayTokenCount));
     if (arrayTokenCount > max_number_of_items) {
