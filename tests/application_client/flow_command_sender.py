@@ -1,7 +1,7 @@
 from enum import IntEnum, Enum
 from typing import Generator, Optional
 from contextlib import contextmanager
-from bip_utils import Bip32Utils
+from bip_utils import Bip32Utils  # type: ignore[import]
 
 from ragger.backend.interface import BackendInterface, RAPDU
 from ragger.bip import CurveChoice

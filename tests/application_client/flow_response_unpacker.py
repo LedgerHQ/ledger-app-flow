@@ -54,7 +54,7 @@ def unpack_get_version_response(response: bytes) -> Tuple[int, str, int, int]:
     return (test, version, locked, dev_id)
 
 
-def unpack_get_public_key_response(response: bytes) -> Tuple[bytes]:
+def unpack_get_public_key_response(response: bytes) -> str:
     """ Unpack response for 'get_public_key' APDU:
            pub_key (65)
            pub_key_str (65 * 2)
@@ -76,7 +76,7 @@ def unpack_get_public_key_response(response: bytes) -> Tuple[bytes]:
     return pub_key
 
 
-def unpack_get_slot_response(response: bytes) -> Tuple[bytes, bytes, bytes]:
+def unpack_get_slot_response(response: bytes) -> Tuple[str, str, str]:
     """ Unpack response for 'get_slot' APDU:
            address (8)
            derivation_path (4 * 5)
