@@ -22,7 +22,8 @@ endif
 
 include $(BOLOS_SDK)/Makefile.defines
 
-#CFLAGS += -Wno-deprecated
+# Ensure CI success, and limit warning output during compilation
+CFLAGS += -Wno-deprecated
 
 ########################################
 #        Mandatory configuration       #
