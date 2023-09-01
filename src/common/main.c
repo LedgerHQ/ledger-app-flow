@@ -1,26 +1,25 @@
 /*******************************************************************************
-*   (c) 2016 Ledger
-*   (c) 2018, 2019 Zondax GmbH
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   (c) 2016 Ledger
+ *   (c) 2018, 2019 Zondax GmbH
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 #include "app_main.h"
 #include "view.h"
 
 #include <os_io_seproxyhal.h>
 
-__attribute__((section(".boot"))) int
-main(void) {
+__attribute__((section(".boot"))) int main(void) {
     // exit critical section
     __asm volatile("cpsie i");
 
@@ -32,10 +31,8 @@ main(void) {
     volatile uint16_t sw = 0;
 
     for (;;) {
-        BEGIN_TRY
-        {
-            TRY
-            {
+        BEGIN_TRY {
+            TRY {
                 if (!app_init_done) {
                     app_init();
                     app_init_done = 1;
@@ -48,8 +45,7 @@ main(void) {
                 flags = 0;
                 CHECK_APP_CANARY()
 
-                if (rx == 0)
-                    THROW(APDU_CODE_EMPTY_BUFFER);
+                if (rx == 0) THROW(APDU_CODE_EMPTY_BUFFER);
 
                 handle_generic_apdu(&flags, &tx, rx);
                 CHECK_APP_CANARY()
@@ -57,14 +53,12 @@ main(void) {
                 handleApdu(&flags, &tx, rx);
                 CHECK_APP_CANARY()
             }
-            CATCH(EXCEPTION_IO_RESET)
-            {
+            CATCH(EXCEPTION_IO_RESET) {
                 // reset IO and UX before continuing
                 app_init();
                 continue;
             }
-            CATCH_OTHER(e)
-            {
+            CATCH_OTHER(e) {
                 if (app_init_done) {
                     switch (e & 0xF000) {
                         case 0x6000:
@@ -80,8 +74,8 @@ main(void) {
                     tx += 2;
                 }
             }
-            FINALLY
-            {}
+            FINALLY {
+            }
         }
         END_TRY;
     }

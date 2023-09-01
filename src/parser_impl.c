@@ -1,18 +1,18 @@
 /*******************************************************************************
-*  (c) 2019 Zondax GmbH
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *  (c) 2019 Zondax GmbH
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 #include <zxmacros.h>
 #include <zxformat.h>
@@ -25,8 +25,10 @@
 
 parser_tx_t parser_tx_obj;
 
-#define CHECK_KIND(KIND, EXPECTED_KIND) \
-    if (KIND != EXPECTED_KIND) { return PARSER_RLP_ERROR_INVALID_KIND; }
+#define CHECK_KIND(KIND, EXPECTED_KIND)       \
+    if (KIND != EXPECTED_KIND) {              \
+        return PARSER_RLP_ERROR_INVALID_KIND; \
+    }
 
 parser_error_t parser_init_context(parser_context_t *ctx,
                                    const uint8_t *buffer,
@@ -146,7 +148,10 @@ parser_error_t json_validateToken(parsed_json_t *parsedJson, uint16_t tokenIdx) 
     return PARSER_OK;
 }
 
-parser_error_t json_extractToken(char *outVal, uint16_t outValLen, parsed_json_t *parsedJson, uint16_t tokenIdx) {
+parser_error_t json_extractToken(char *outVal,
+                                 uint16_t outValLen,
+                                 parsed_json_t *parsedJson,
+                                 uint16_t tokenIdx) {
     MEMZERO(outVal, outValLen);
     CHECK_PARSER_ERR(json_validateToken(parsedJson, tokenIdx))
 
@@ -159,7 +164,9 @@ parser_error_t json_extractToken(char *outVal, uint16_t outValLen, parsed_json_t
     return PARSER_OK;
 }
 
-parser_error_t json_matchToken(parsed_json_t *parsedJson, uint16_t tokenIdx, const char *expectedValue) {
+parser_error_t json_matchToken(parsed_json_t *parsedJson,
+                               uint16_t tokenIdx,
+                               const char *expectedValue) {
     CHECK_PARSER_ERR(json_validateToken(parsedJson, tokenIdx))
 
     const jsmntok_t token = parsedJson->tokens[tokenIdx];
@@ -198,10 +205,13 @@ parser_error_t json_matchNull(parsed_json_t *parsedJson, uint16_t tokenIdx) {
 }
 
 parser_error_t json_matchKeyValue(parsed_json_t *parsedJson,
-                                  uint16_t tokenIdx, const char *expectedType, jsmntype_t jsonType, uint16_t *valueTokenIdx) {
+                                  uint16_t tokenIdx,
+                                  const char *expectedType,
+                                  jsmntype_t jsonType,
+                                  uint16_t *valueTokenIdx) {
     CHECK_PARSER_ERR(json_validateToken(parsedJson, tokenIdx))
 
-    if (! (tokenIdx + 4 < parsedJson->numberOfTokens)) {
+    if (!(tokenIdx + 4 < parsedJson->numberOfTokens)) {
         // we need this token and 4 more
         return PARSER_JSON_INVALID_TOKEN_IDX;
     }
@@ -227,9 +237,12 @@ parser_error_t json_matchKeyValue(parsed_json_t *parsedJson,
     return PARSER_OK;
 }
 
-//valueTokenIdx is JSON_MATCH_VALUE_IDX_NONE if the optional is null
+// valueTokenIdx is JSON_MATCH_VALUE_IDX_NONE if the optional is null
 parser_error_t json_matchOptionalKeyValue(parsed_json_t *parsedJson,
-                                  uint16_t tokenIdx, const char *expectedType, jsmntype_t jsonType, uint16_t *valueTokenIdx) {
+                                          uint16_t tokenIdx,
+                                          const char *expectedType,
+                                          jsmntype_t jsonType,
+                                          uint16_t *valueTokenIdx) {
     CHECK_PARSER_ERR(json_validateToken(parsedJson, tokenIdx))
 
     if (!(tokenIdx + 4 < parsedJson->numberOfTokens)) {
@@ -249,22 +262,23 @@ parser_error_t json_matchOptionalKeyValue(parsed_json_t *parsedJson,
     CHECK_PARSER_ERR(json_matchToken(parsedJson, tokenIdx + 1, (char *) "type"))
     CHECK_PARSER_ERR(json_matchToken(parsedJson, tokenIdx + 2, (char *) "Optional"))
     CHECK_PARSER_ERR(json_matchToken(parsedJson, tokenIdx + 3, (char *) "value"))
-    if (parsedJson->tokens[tokenIdx + 4].type == JSMN_PRIMITIVE) {  //optional null
+    if (parsedJson->tokens[tokenIdx + 4].type == JSMN_PRIMITIVE) {  // optional null
         CHECK_PARSER_ERR(json_matchNull(parsedJson, tokenIdx + 4))
         *valueTokenIdx = JSON_MATCH_VALUE_IDX_NONE;
         return PARSER_OK;
     }
 
-    if (parsedJson->tokens[tokenIdx + 4].type == JSMN_OBJECT) {  //optional not not null
-        return json_matchKeyValue(parsedJson, tokenIdx+4, expectedType, jsonType, valueTokenIdx);
+    if (parsedJson->tokens[tokenIdx + 4].type == JSMN_OBJECT) {  // optional not not null
+        return json_matchKeyValue(parsedJson, tokenIdx + 4, expectedType, jsonType, valueTokenIdx);
     }
 
     return PARSER_UNEXPECTED_VALUE;
 }
 
-//valueTokenIdx is JSON_MATCH_VALUE_IDX_NONE if the optional is null
+// valueTokenIdx is JSON_MATCH_VALUE_IDX_NONE if the optional is null
 parser_error_t json_matchOptionalArray(parsed_json_t *parsedJson,
-                                  uint16_t tokenIdx, uint16_t *valueTokenIdx) {
+                                       uint16_t tokenIdx,
+                                       uint16_t *valueTokenIdx) {
     CHECK_PARSER_ERR(json_validateToken(parsedJson, tokenIdx))
 
     if (!(tokenIdx + 4 < parsedJson->numberOfTokens)) {
@@ -273,7 +287,7 @@ parser_error_t json_matchOptionalArray(parsed_json_t *parsedJson,
     }
 
     if (parsedJson->tokens[tokenIdx].type != JSMN_OBJECT) {
-        return PARSER_UNEXPECTED_TYPE ;
+        return PARSER_UNEXPECTED_TYPE;
     }
 
     if (parsedJson->tokens[tokenIdx].size != 2) {
@@ -284,12 +298,12 @@ parser_error_t json_matchOptionalArray(parsed_json_t *parsedJson,
     CHECK_PARSER_ERR(json_matchToken(parsedJson, tokenIdx + 1, (char *) "type"))
     CHECK_PARSER_ERR(json_matchToken(parsedJson, tokenIdx + 2, (char *) "Optional"))
     CHECK_PARSER_ERR(json_matchToken(parsedJson, tokenIdx + 3, (char *) "value"))
-    if (parsedJson->tokens[tokenIdx + 4].type == JSMN_PRIMITIVE) {  //optional null
+    if (parsedJson->tokens[tokenIdx + 4].type == JSMN_PRIMITIVE) {  // optional null
         CHECK_PARSER_ERR(json_matchNull(parsedJson, tokenIdx + 4))
         *valueTokenIdx = JSON_MATCH_VALUE_IDX_NONE;
         return PARSER_OK;
     }
-    if (parsedJson->tokens[tokenIdx + 4].type == JSMN_OBJECT) {  //optional not null
+    if (parsedJson->tokens[tokenIdx + 4].type == JSMN_OBJECT) {  // optional not null
         if (!(tokenIdx + 8 < parsedJson->numberOfTokens)) {
             return PARSER_JSON_INVALID_TOKEN_IDX;
         }
@@ -327,12 +341,18 @@ parser_error_t formatStrUInt8AsHex(const char *decStr, char *hexStr) {
     return PARSER_OK;
 }
 
-parser_error_t json_extractString(char *outVal, uint16_t outValLen, parsed_json_t *parsedJson, uint16_t tokenIdx) {
+parser_error_t json_extractString(char *outVal,
+                                  uint16_t outValLen,
+                                  parsed_json_t *parsedJson,
+                                  uint16_t tokenIdx) {
     MEMZERO(outVal, outValLen);
 
     uint16_t internalTokenElemIdx;
-    CHECK_PARSER_ERR(json_matchKeyValue(
-            parsedJson, tokenIdx, (char *) "String", JSMN_STRING, &internalTokenElemIdx))
+    CHECK_PARSER_ERR(json_matchKeyValue(parsedJson,
+                                        tokenIdx,
+                                        (char *) "String",
+                                        JSMN_STRING,
+                                        &internalTokenElemIdx))
 
     CHECK_PARSER_ERR(json_extractToken(outVal, outValLen, parsedJson, internalTokenElemIdx))
 
@@ -352,150 +372,197 @@ parser_error_t _matchScriptType(uint8_t scriptHash[32], script_type_e *scriptTyp
 
     struct known_script_entry {
         script_type_e script_type;
-        char* template;
+        char *template;
     };
 
     const struct known_script_entry KNOWN_TYPES[] = {
-        {SCRIPT_TOKEN_TRANSFER, (char *)TEMPLATE_HASH_TOKEN_TRANSFER_EMULATOR},
-        {SCRIPT_TOKEN_TRANSFER, (char *)TEMPLATE_HASH_TOKEN_TRANSFER_TESTNET},
-        {SCRIPT_TOKEN_TRANSFER, (char *)TEMPLATE_HASH_TOKEN_TRANSFER_MAINNET},
+        {SCRIPT_TOKEN_TRANSFER, (char *) TEMPLATE_HASH_TOKEN_TRANSFER_EMULATOR},
+        {SCRIPT_TOKEN_TRANSFER, (char *) TEMPLATE_HASH_TOKEN_TRANSFER_TESTNET},
+        {SCRIPT_TOKEN_TRANSFER, (char *) TEMPLATE_HASH_TOKEN_TRANSFER_MAINNET},
 
-        {SCRIPT_CREATE_ACCOUNT, (char *)TEMPLATE_HASH_CREATE_ACCOUNT},
+        {SCRIPT_CREATE_ACCOUNT, (char *) TEMPLATE_HASH_CREATE_ACCOUNT},
 
-        {SCRIPT_ADD_NEW_KEY, (char *)TEMPLATE_HASH_ADD_NEW_KEY},
+        {SCRIPT_ADD_NEW_KEY, (char *) TEMPLATE_HASH_ADD_NEW_KEY},
 
-        {SCRIPT_TH01_WITHDRAW_UNLOCKED_TOKENS, (char *)TEMPLATE_HASH_TH01_WITHDRAW_UNLOCKED_TOKENS_TESTNET},
-        {SCRIPT_TH01_WITHDRAW_UNLOCKED_TOKENS, (char *)TEMPLATE_HASH_TH01_WITHDRAW_UNLOCKED_TOKENS_MAINNET},
+        {SCRIPT_TH01_WITHDRAW_UNLOCKED_TOKENS,
+         (char *) TEMPLATE_HASH_TH01_WITHDRAW_UNLOCKED_TOKENS_TESTNET},
+        {SCRIPT_TH01_WITHDRAW_UNLOCKED_TOKENS,
+         (char *) TEMPLATE_HASH_TH01_WITHDRAW_UNLOCKED_TOKENS_MAINNET},
 
-        {SCRIPT_TH02_DEPOSIT_UNLOCKED_TOKENS, (char *)TEMPLATE_HASH_TH02_DEPOSIT_UNLOCKED_TOKENS_TESTNET},
-        {SCRIPT_TH02_DEPOSIT_UNLOCKED_TOKENS, (char *)TEMPLATE_HASH_TH02_DEPOSIT_UNLOCKED_TOKENS_MAINNET},
+        {SCRIPT_TH02_DEPOSIT_UNLOCKED_TOKENS,
+         (char *) TEMPLATE_HASH_TH02_DEPOSIT_UNLOCKED_TOKENS_TESTNET},
+        {SCRIPT_TH02_DEPOSIT_UNLOCKED_TOKENS,
+         (char *) TEMPLATE_HASH_TH02_DEPOSIT_UNLOCKED_TOKENS_MAINNET},
 
-        {SCRIPT_TH06_REGISTER_NODE, (char *)TEMPLATE_HASH_TH06_REGISTER_NODE_TESTNET},
-        {SCRIPT_TH06_REGISTER_NODE, (char *)TEMPLATE_HASH_TH06_REGISTER_NODE_MAINNET},
+        {SCRIPT_TH06_REGISTER_NODE, (char *) TEMPLATE_HASH_TH06_REGISTER_NODE_TESTNET},
+        {SCRIPT_TH06_REGISTER_NODE, (char *) TEMPLATE_HASH_TH06_REGISTER_NODE_MAINNET},
 
-        {SCRIPT_TH08_STAKE_NEW_TOKENS, (char *)TEMPLATE_HASH_TH08_STAKE_NEW_TOKENS_TESTNET},
-        {SCRIPT_TH08_STAKE_NEW_TOKENS, (char *)TEMPLATE_HASH_TH08_STAKE_NEW_TOKENS_MAINNET},
+        {SCRIPT_TH08_STAKE_NEW_TOKENS, (char *) TEMPLATE_HASH_TH08_STAKE_NEW_TOKENS_TESTNET},
+        {SCRIPT_TH08_STAKE_NEW_TOKENS, (char *) TEMPLATE_HASH_TH08_STAKE_NEW_TOKENS_MAINNET},
 
-        {SCRIPT_TH09_RESTAKE_UNSTAKED_TOKENS, (char *)TEMPLATE_HASH_TH09_RESTAKE_UNSTAKED_TOKENS_TESTNET},
-        {SCRIPT_TH09_RESTAKE_UNSTAKED_TOKENS, (char *)TEMPLATE_HASH_TH09_RESTAKE_UNSTAKED_TOKENS_MAINNET},
+        {SCRIPT_TH09_RESTAKE_UNSTAKED_TOKENS,
+         (char *) TEMPLATE_HASH_TH09_RESTAKE_UNSTAKED_TOKENS_TESTNET},
+        {SCRIPT_TH09_RESTAKE_UNSTAKED_TOKENS,
+         (char *) TEMPLATE_HASH_TH09_RESTAKE_UNSTAKED_TOKENS_MAINNET},
 
-        {SCRIPT_TH10_RESTAKE_REWARDED_TOKENS, (char *)TEMPLATE_HASH_TH10_RESTAKE_REWARDED_TOKENS_TESTNET},
-        {SCRIPT_TH10_RESTAKE_REWARDED_TOKENS, (char *)TEMPLATE_HASH_TH10_RESTAKE_REWARDED_TOKENS_MAINNET},
+        {SCRIPT_TH10_RESTAKE_REWARDED_TOKENS,
+         (char *) TEMPLATE_HASH_TH10_RESTAKE_REWARDED_TOKENS_TESTNET},
+        {SCRIPT_TH10_RESTAKE_REWARDED_TOKENS,
+         (char *) TEMPLATE_HASH_TH10_RESTAKE_REWARDED_TOKENS_MAINNET},
 
-        {SCRIPT_TH11_UNSTAKE_TOKENS, (char *)TEMPLATE_HASH_TH11_UNSTAKE_TOKENS_TESTNET},
-        {SCRIPT_TH11_UNSTAKE_TOKENS, (char *)TEMPLATE_HASH_TH11_UNSTAKE_TOKENS_MAINNET},
+        {SCRIPT_TH11_UNSTAKE_TOKENS, (char *) TEMPLATE_HASH_TH11_UNSTAKE_TOKENS_TESTNET},
+        {SCRIPT_TH11_UNSTAKE_TOKENS, (char *) TEMPLATE_HASH_TH11_UNSTAKE_TOKENS_MAINNET},
 
-        {SCRIPT_TH12_UNSTAKE_ALL_TOKENS, (char *)TEMPLATE_HASH_TH12_UNSTAKE_ALL_TOKENS_TESTNET},
-        {SCRIPT_TH12_UNSTAKE_ALL_TOKENS, (char *)TEMPLATE_HASH_TH12_UNSTAKE_ALL_TOKENS_MAINNET},
+        {SCRIPT_TH12_UNSTAKE_ALL_TOKENS, (char *) TEMPLATE_HASH_TH12_UNSTAKE_ALL_TOKENS_TESTNET},
+        {SCRIPT_TH12_UNSTAKE_ALL_TOKENS, (char *) TEMPLATE_HASH_TH12_UNSTAKE_ALL_TOKENS_MAINNET},
 
-        {SCRIPT_TH13_WITHDRAW_UNSTAKED_TOKENS, (char *)TEMPLATE_HASH_TH13_WITHDRAW_UNSTAKED_TOKENS_TESTNET},
-        {SCRIPT_TH13_WITHDRAW_UNSTAKED_TOKENS, (char *)TEMPLATE_HASH_TH13_WITHDRAW_UNSTAKED_TOKENS_MAINNET},
+        {SCRIPT_TH13_WITHDRAW_UNSTAKED_TOKENS,
+         (char *) TEMPLATE_HASH_TH13_WITHDRAW_UNSTAKED_TOKENS_TESTNET},
+        {SCRIPT_TH13_WITHDRAW_UNSTAKED_TOKENS,
+         (char *) TEMPLATE_HASH_TH13_WITHDRAW_UNSTAKED_TOKENS_MAINNET},
 
-        {SCRIPT_TH14_WITHDRAW_REWARDED_TOKENS, (char *)TEMPLATE_HASH_TH14_WITHDRAW_REWARDED_TOKENS_TESTNET},
-        {SCRIPT_TH14_WITHDRAW_REWARDED_TOKENS, (char *)TEMPLATE_HASH_TH14_WITHDRAW_REWARDED_TOKENS_MAINNET},
+        {SCRIPT_TH14_WITHDRAW_REWARDED_TOKENS,
+         (char *) TEMPLATE_HASH_TH14_WITHDRAW_REWARDED_TOKENS_TESTNET},
+        {SCRIPT_TH14_WITHDRAW_REWARDED_TOKENS,
+         (char *) TEMPLATE_HASH_TH14_WITHDRAW_REWARDED_TOKENS_MAINNET},
 
-        {SCRIPT_TH16_REGISTER_OPERATOR_NODE, (char *)TEMPLATE_HASH_TH16_REGISTER_OPERATOR_NODE_TESTNET},
-        {SCRIPT_TH16_REGISTER_OPERATOR_NODE, (char *)TEMPLATE_HASH_TH16_REGISTER_OPERATOR_NODE_MAINNET},
+        {SCRIPT_TH16_REGISTER_OPERATOR_NODE,
+         (char *) TEMPLATE_HASH_TH16_REGISTER_OPERATOR_NODE_TESTNET},
+        {SCRIPT_TH16_REGISTER_OPERATOR_NODE,
+         (char *) TEMPLATE_HASH_TH16_REGISTER_OPERATOR_NODE_MAINNET},
 
-        {SCRIPT_TH17_REGISTER_DELEGATOR, (char *)TEMPLATE_HASH_TH17_REGISTER_DELEGATOR_TESTNET},
-        {SCRIPT_TH17_REGISTER_DELEGATOR, (char *)TEMPLATE_HASH_TH17_REGISTER_DELEGATOR_MAINNET},
+        {SCRIPT_TH17_REGISTER_DELEGATOR, (char *) TEMPLATE_HASH_TH17_REGISTER_DELEGATOR_TESTNET},
+        {SCRIPT_TH17_REGISTER_DELEGATOR, (char *) TEMPLATE_HASH_TH17_REGISTER_DELEGATOR_MAINNET},
 
-        {SCRIPT_TH19_DELEGATE_NEW_TOKENS, (char *)TEMPLATE_HASH_TH19_DELEGATE_NEW_TOKENS_TESTNET},
-        {SCRIPT_TH19_DELEGATE_NEW_TOKENS, (char *)TEMPLATE_HASH_TH19_DELEGATE_NEW_TOKENS_MAINNET},
+        {SCRIPT_TH19_DELEGATE_NEW_TOKENS, (char *) TEMPLATE_HASH_TH19_DELEGATE_NEW_TOKENS_TESTNET},
+        {SCRIPT_TH19_DELEGATE_NEW_TOKENS, (char *) TEMPLATE_HASH_TH19_DELEGATE_NEW_TOKENS_MAINNET},
 
-        {SCRIPT_TH20_RESTAKE_UNSTAKED_DELEGATED_TOKENS, (char *)TEMPLATE_HASH_TH20_RESTAKE_UNSTAKED_DELEGATED_TOKENS_TESTNET},
-        {SCRIPT_TH20_RESTAKE_UNSTAKED_DELEGATED_TOKENS, (char *)TEMPLATE_HASH_TH20_RESTAKE_UNSTAKED_DELEGATED_TOKENS_MAINNET},
+        {SCRIPT_TH20_RESTAKE_UNSTAKED_DELEGATED_TOKENS,
+         (char *) TEMPLATE_HASH_TH20_RESTAKE_UNSTAKED_DELEGATED_TOKENS_TESTNET},
+        {SCRIPT_TH20_RESTAKE_UNSTAKED_DELEGATED_TOKENS,
+         (char *) TEMPLATE_HASH_TH20_RESTAKE_UNSTAKED_DELEGATED_TOKENS_MAINNET},
 
-        {SCRIPT_TH21_RESTAKE_REWARDED_DELEGATED_TOKENS, (char *)TEMPLATE_HASH_TH21_RESTAKE_REWARDED_DELEGATED_TOKENS_TESTNET},
-        {SCRIPT_TH21_RESTAKE_REWARDED_DELEGATED_TOKENS, (char *)TEMPLATE_HASH_TH21_RESTAKE_REWARDED_DELEGATED_TOKENS_MAINNET},
+        {SCRIPT_TH21_RESTAKE_REWARDED_DELEGATED_TOKENS,
+         (char *) TEMPLATE_HASH_TH21_RESTAKE_REWARDED_DELEGATED_TOKENS_TESTNET},
+        {SCRIPT_TH21_RESTAKE_REWARDED_DELEGATED_TOKENS,
+         (char *) TEMPLATE_HASH_TH21_RESTAKE_REWARDED_DELEGATED_TOKENS_MAINNET},
 
-        {SCRIPT_TH22_UNSTAKE_DELEGATED_TOKENS, (char *)TEMPLATE_HASH_TH22_UNSTAKE_DELEGATED_TOKENS_TESTNET},
-        {SCRIPT_TH22_UNSTAKE_DELEGATED_TOKENS, (char *)TEMPLATE_HASH_TH22_UNSTAKE_DELEGATED_TOKENS_MAINNET},
+        {SCRIPT_TH22_UNSTAKE_DELEGATED_TOKENS,
+         (char *) TEMPLATE_HASH_TH22_UNSTAKE_DELEGATED_TOKENS_TESTNET},
+        {SCRIPT_TH22_UNSTAKE_DELEGATED_TOKENS,
+         (char *) TEMPLATE_HASH_TH22_UNSTAKE_DELEGATED_TOKENS_MAINNET},
 
-        {SCRIPT_TH23_WITHDRAW_UNSTAKED_DELEGATED_TOKENS, (char *)TEMPLATE_HASH_TH23_WITHDRAW_UNSTAKED_DELEGATED_TOKENS_TESTNET},
-        {SCRIPT_TH23_WITHDRAW_UNSTAKED_DELEGATED_TOKENS, (char *)TEMPLATE_HASH_TH23_WITHDRAW_UNSTAKED_DELEGATED_TOKENS_MAINNET},
+        {SCRIPT_TH23_WITHDRAW_UNSTAKED_DELEGATED_TOKENS,
+         (char *) TEMPLATE_HASH_TH23_WITHDRAW_UNSTAKED_DELEGATED_TOKENS_TESTNET},
+        {SCRIPT_TH23_WITHDRAW_UNSTAKED_DELEGATED_TOKENS,
+         (char *) TEMPLATE_HASH_TH23_WITHDRAW_UNSTAKED_DELEGATED_TOKENS_MAINNET},
 
-        {SCRIPT_TH24_WITHDRAW_REWARDED_DELEGATED_TOKENS, (char *)TEMPLATE_HASH_TH24_WITHDRAW_REWARDED_DELEGATED_TOKENS_TESTNET},
-        {SCRIPT_TH24_WITHDRAW_REWARDED_DELEGATED_TOKENS, (char *)TEMPLATE_HASH_TH24_WITHDRAW_REWARDED_DELEGATED_TOKENS_MAINNET},
+        {SCRIPT_TH24_WITHDRAW_REWARDED_DELEGATED_TOKENS,
+         (char *) TEMPLATE_HASH_TH24_WITHDRAW_REWARDED_DELEGATED_TOKENS_TESTNET},
+        {SCRIPT_TH24_WITHDRAW_REWARDED_DELEGATED_TOKENS,
+         (char *) TEMPLATE_HASH_TH24_WITHDRAW_REWARDED_DELEGATED_TOKENS_MAINNET},
 
-        {SCRIPT_TH25_UPDATE_NETWORKING_ADDRESS, (char *)TEMPLATE_HASH_TH25_UPDATE_NETWORKING_ADDRESS_TESTNET},
-        {SCRIPT_TH25_UPDATE_NETWORKING_ADDRESS, (char *)TEMPLATE_HASH_TH25_UPDATE_NETWORKING_ADDRESS_MAINNET},
+        {SCRIPT_TH25_UPDATE_NETWORKING_ADDRESS,
+         (char *) TEMPLATE_HASH_TH25_UPDATE_NETWORKING_ADDRESS_TESTNET},
+        {SCRIPT_TH25_UPDATE_NETWORKING_ADDRESS,
+         (char *) TEMPLATE_HASH_TH25_UPDATE_NETWORKING_ADDRESS_MAINNET},
 
-        {SCRIPT_SCO01_SETUP_STAKING_COLLECTION, (char *)TEMPLATE_HASH_SCO01_SETUP_STAKING_COLLECTION_TESTNET},
-        {SCRIPT_SCO01_SETUP_STAKING_COLLECTION, (char *)TEMPLATE_HASH_SCO01_SETUP_STAKING_COLLECTION_MAINNET},
+        {SCRIPT_SCO01_SETUP_STAKING_COLLECTION,
+         (char *) TEMPLATE_HASH_SCO01_SETUP_STAKING_COLLECTION_TESTNET},
+        {SCRIPT_SCO01_SETUP_STAKING_COLLECTION,
+         (char *) TEMPLATE_HASH_SCO01_SETUP_STAKING_COLLECTION_MAINNET},
 
-        {SCRIPT_SCO02_REGISTER_DELEGATOR, (char *)TEMPLATE_HASH_SCO02_REGISTER_DELEGATOR_TESTNET},
-        {SCRIPT_SCO02_REGISTER_DELEGATOR, (char *)TEMPLATE_HASH_SCO02_REGISTER_DELEGATOR_MAINNET},
+        {SCRIPT_SCO02_REGISTER_DELEGATOR, (char *) TEMPLATE_HASH_SCO02_REGISTER_DELEGATOR_TESTNET},
+        {SCRIPT_SCO02_REGISTER_DELEGATOR, (char *) TEMPLATE_HASH_SCO02_REGISTER_DELEGATOR_MAINNET},
 
-        {SCRIPT_SCO03_REGISTER_NODE, (char *)TEMPLATE_HASH_SCO0301_REGISTER_NODE_TESTNET},
-        {SCRIPT_SCO03_REGISTER_NODE, (char *)TEMPLATE_HASH_SCO0301_REGISTER_NODE_MAINNET},
+        {SCRIPT_SCO03_REGISTER_NODE, (char *) TEMPLATE_HASH_SCO0301_REGISTER_NODE_TESTNET},
+        {SCRIPT_SCO03_REGISTER_NODE, (char *) TEMPLATE_HASH_SCO0301_REGISTER_NODE_MAINNET},
 
-        {SCRIPT_SCO04_CREATE_MACHINE_ACCOUNT, (char *)TEMPLATE_HASH_SCO0401_CREATE_MACHINE_ACCOUNT_TESTNET},
-        {SCRIPT_SCO04_CREATE_MACHINE_ACCOUNT, (char *)TEMPLATE_HASH_SCO0401_CREATE_MACHINE_ACCOUNT_MAINNET},
+        {SCRIPT_SCO04_CREATE_MACHINE_ACCOUNT,
+         (char *) TEMPLATE_HASH_SCO0401_CREATE_MACHINE_ACCOUNT_TESTNET},
+        {SCRIPT_SCO04_CREATE_MACHINE_ACCOUNT,
+         (char *) TEMPLATE_HASH_SCO0401_CREATE_MACHINE_ACCOUNT_MAINNET},
 
-        {SCRIPT_SCO05_REQUEST_UNSTAKING, (char *)TEMPLATE_HASH_SCO05_REQUEST_UNSTAKING_TESTNET},
-        {SCRIPT_SCO05_REQUEST_UNSTAKING, (char *)TEMPLATE_HASH_SCO05_REQUEST_UNSTAKING_MAINNET},
+        {SCRIPT_SCO05_REQUEST_UNSTAKING, (char *) TEMPLATE_HASH_SCO05_REQUEST_UNSTAKING_TESTNET},
+        {SCRIPT_SCO05_REQUEST_UNSTAKING, (char *) TEMPLATE_HASH_SCO05_REQUEST_UNSTAKING_MAINNET},
 
-        {SCRIPT_SCO06_STAKE_NEW_TOKENS, (char *)TEMPLATE_HASH_SCO06_STAKE_NEW_TOKENS_TESTNET},
-        {SCRIPT_SCO06_STAKE_NEW_TOKENS, (char *)TEMPLATE_HASH_SCO06_STAKE_NEW_TOKENS_MAINNET},
+        {SCRIPT_SCO06_STAKE_NEW_TOKENS, (char *) TEMPLATE_HASH_SCO06_STAKE_NEW_TOKENS_TESTNET},
+        {SCRIPT_SCO06_STAKE_NEW_TOKENS, (char *) TEMPLATE_HASH_SCO06_STAKE_NEW_TOKENS_MAINNET},
 
-        {SCRIPT_SCO07_STAKE_REWARD_TOKENS, (char *)TEMPLATE_HASH_SCO07_STAKE_REWARD_TOKENS_TESTNET},
-        {SCRIPT_SCO07_STAKE_REWARD_TOKENS, (char *)TEMPLATE_HASH_SCO07_STAKE_REWARD_TOKENS_MAINNET},
+        {SCRIPT_SCO07_STAKE_REWARD_TOKENS,
+         (char *) TEMPLATE_HASH_SCO07_STAKE_REWARD_TOKENS_TESTNET},
+        {SCRIPT_SCO07_STAKE_REWARD_TOKENS,
+         (char *) TEMPLATE_HASH_SCO07_STAKE_REWARD_TOKENS_MAINNET},
 
-        {SCRIPT_SCO08_STAKE_UNSTAKED_TOKENS, (char *)TEMPLATE_HASH_SCO08_STAKE_UNSTAKED_TOKENS_TESTNET},
-        {SCRIPT_SCO08_STAKE_UNSTAKED_TOKENS, (char *)TEMPLATE_HASH_SCO08_STAKE_UNSTAKED_TOKENS_MAINNET},
+        {SCRIPT_SCO08_STAKE_UNSTAKED_TOKENS,
+         (char *) TEMPLATE_HASH_SCO08_STAKE_UNSTAKED_TOKENS_TESTNET},
+        {SCRIPT_SCO08_STAKE_UNSTAKED_TOKENS,
+         (char *) TEMPLATE_HASH_SCO08_STAKE_UNSTAKED_TOKENS_MAINNET},
 
-        {SCRIPT_SCO09_UNSTAKE_ALL, (char *)TEMPLATE_HASH_SCO09_UNSTAKE_ALL_TESTNET},
-        {SCRIPT_SCO09_UNSTAKE_ALL, (char *)TEMPLATE_HASH_SCO09_UNSTAKE_ALL_MAINNET},
+        {SCRIPT_SCO09_UNSTAKE_ALL, (char *) TEMPLATE_HASH_SCO09_UNSTAKE_ALL_TESTNET},
+        {SCRIPT_SCO09_UNSTAKE_ALL, (char *) TEMPLATE_HASH_SCO09_UNSTAKE_ALL_MAINNET},
 
-        {SCRIPT_SCO10_WITHDRAW_REWARD_TOKENS, (char *)TEMPLATE_HASH_SCO10_WITHDRAW_REWARD_TOKENS_TESTNET},
-        {SCRIPT_SCO10_WITHDRAW_REWARD_TOKENS, (char *)TEMPLATE_HASH_SCO10_WITHDRAW_REWARD_TOKENS_MAINNET},
+        {SCRIPT_SCO10_WITHDRAW_REWARD_TOKENS,
+         (char *) TEMPLATE_HASH_SCO10_WITHDRAW_REWARD_TOKENS_TESTNET},
+        {SCRIPT_SCO10_WITHDRAW_REWARD_TOKENS,
+         (char *) TEMPLATE_HASH_SCO10_WITHDRAW_REWARD_TOKENS_MAINNET},
 
-        {SCRIPT_SCO11_WITHDRAW_UNSTAKED_TOKENS, (char *)TEMPLATE_HASH_SCO11_WITHDRAW_UNSTAKED_TOKENS_TESTNET},
-        {SCRIPT_SCO11_WITHDRAW_UNSTAKED_TOKENS, (char *)TEMPLATE_HASH_SCO11_WITHDRAW_UNSTAKED_TOKENS_MAINNET},
+        {SCRIPT_SCO11_WITHDRAW_UNSTAKED_TOKENS,
+         (char *) TEMPLATE_HASH_SCO11_WITHDRAW_UNSTAKED_TOKENS_TESTNET},
+        {SCRIPT_SCO11_WITHDRAW_UNSTAKED_TOKENS,
+         (char *) TEMPLATE_HASH_SCO11_WITHDRAW_UNSTAKED_TOKENS_MAINNET},
 
-        {SCRIPT_SCO12_CLOSE_STAKE, (char *)TEMPLATE_HASH_SCO12_CLOSE_STAKE_TESTNET},
-        {SCRIPT_SCO12_CLOSE_STAKE, (char *)TEMPLATE_HASH_SCO12_CLOSE_STAKE_MAINNET},
+        {SCRIPT_SCO12_CLOSE_STAKE, (char *) TEMPLATE_HASH_SCO12_CLOSE_STAKE_TESTNET},
+        {SCRIPT_SCO12_CLOSE_STAKE, (char *) TEMPLATE_HASH_SCO12_CLOSE_STAKE_MAINNET},
 
-        {SCRIPT_SCO13_TRANSFER_NODE, (char *)TEMPLATE_HASH_SCO13_TRANSFER_NODE_TESTNET},
-        {SCRIPT_SCO13_TRANSFER_NODE, (char *)TEMPLATE_HASH_SCO13_TRANSFER_NODE_MAINNET},
+        {SCRIPT_SCO13_TRANSFER_NODE, (char *) TEMPLATE_HASH_SCO13_TRANSFER_NODE_TESTNET},
+        {SCRIPT_SCO13_TRANSFER_NODE, (char *) TEMPLATE_HASH_SCO13_TRANSFER_NODE_MAINNET},
 
-        {SCRIPT_SCO14_TRANSFER_DELEGATOR, (char *)TEMPLATE_HASH_SCO14_TRANSFER_DELEGATOR_TESTNET},
-        {SCRIPT_SCO14_TRANSFER_DELEGATOR, (char *)TEMPLATE_HASH_SCO14_TRANSFER_DELEGATOR_MAINNET},
+        {SCRIPT_SCO14_TRANSFER_DELEGATOR, (char *) TEMPLATE_HASH_SCO14_TRANSFER_DELEGATOR_TESTNET},
+        {SCRIPT_SCO14_TRANSFER_DELEGATOR, (char *) TEMPLATE_HASH_SCO14_TRANSFER_DELEGATOR_MAINNET},
 
-        {SCRIPT_SCO15_WITHDRAW_FROM_MACHINE_ACCOUNT, (char *)TEMPLATE_HASH_SCO15_WITHDRAW_FROM_MACHINE_ACCOUNT_TESTNET},
-        {SCRIPT_SCO15_WITHDRAW_FROM_MACHINE_ACCOUNT, (char *)TEMPLATE_HASH_SCO15_WITHDRAW_FROM_MACHINE_ACCOUNT_MAINNET},
+        {SCRIPT_SCO15_WITHDRAW_FROM_MACHINE_ACCOUNT,
+         (char *) TEMPLATE_HASH_SCO15_WITHDRAW_FROM_MACHINE_ACCOUNT_TESTNET},
+        {SCRIPT_SCO15_WITHDRAW_FROM_MACHINE_ACCOUNT,
+         (char *) TEMPLATE_HASH_SCO15_WITHDRAW_FROM_MACHINE_ACCOUNT_MAINNET},
 
-        {SCRIPT_SCO16_UPDATE_NETWORKING_ADDRESS, (char *)TEMPLATE_HASH_SCO16_UPDATE_NETWORKING_ADDRESS_TESTNET},
-        {SCRIPT_SCO16_UPDATE_NETWORKING_ADDRESS, (char *)TEMPLATE_HASH_SCO16_UPDATE_NETWORKING_ADDRESS_MAINNET},
+        {SCRIPT_SCO16_UPDATE_NETWORKING_ADDRESS,
+         (char *) TEMPLATE_HASH_SCO16_UPDATE_NETWORKING_ADDRESS_TESTNET},
+        {SCRIPT_SCO16_UPDATE_NETWORKING_ADDRESS,
+         (char *) TEMPLATE_HASH_SCO16_UPDATE_NETWORKING_ADDRESS_MAINNET},
 
-        {SCRIPT_FUSD01_SETUP_FUSD_VAULT, (char *)TEMPLATE_HASH_FUSD01_SETUP_FUSD_VAULT_TESTNET},
-        {SCRIPT_FUSD01_SETUP_FUSD_VAULT, (char *)TEMPLATE_HASH_FUSD01_SETUP_FUSD_VAULT_MAINNET},
+        {SCRIPT_FUSD01_SETUP_FUSD_VAULT, (char *) TEMPLATE_HASH_FUSD01_SETUP_FUSD_VAULT_TESTNET},
+        {SCRIPT_FUSD01_SETUP_FUSD_VAULT, (char *) TEMPLATE_HASH_FUSD01_SETUP_FUSD_VAULT_MAINNET},
 
-        {SCRIPT_FUSD02_TRANSFER_FUSD, (char *)TEMPLATE_HASH_FUSD02_TRANSFER_FUSD_TESTNET},
-        {SCRIPT_FUSD02_TRANSFER_FUSD, (char *)TEMPLATE_HASH_FUSD02_TRANSFER_FUSD_MAINNET},
+        {SCRIPT_FUSD02_TRANSFER_FUSD, (char *) TEMPLATE_HASH_FUSD02_TRANSFER_FUSD_TESTNET},
+        {SCRIPT_FUSD02_TRANSFER_FUSD, (char *) TEMPLATE_HASH_FUSD02_TRANSFER_FUSD_MAINNET},
 
-        {SCRIPT_TS01_SET_UP_TOPSHOT_COLLECTION, (char *)TEMPLATE_HASH_TS01_SET_UP_TOPSHOT_COLLECTION_TESTNET},
-        {SCRIPT_TS01_SET_UP_TOPSHOT_COLLECTION, (char *)TEMPLATE_HASH_TS01_SET_UP_TOPSHOT_COLLECTION_MAINNET},
+        {SCRIPT_TS01_SET_UP_TOPSHOT_COLLECTION,
+         (char *) TEMPLATE_HASH_TS01_SET_UP_TOPSHOT_COLLECTION_TESTNET},
+        {SCRIPT_TS01_SET_UP_TOPSHOT_COLLECTION,
+         (char *) TEMPLATE_HASH_TS01_SET_UP_TOPSHOT_COLLECTION_MAINNET},
 
-        {SCRIPT_TS02_TRANSFER_TOP_SHOT_MOMENT, (char *)TEMPLATE_HASH_TS02_TRANSFER_TOP_SHOT_MOMENT_TESTNET},
-        {SCRIPT_TS02_TRANSFER_TOP_SHOT_MOMENT, (char *)TEMPLATE_HASH_TS02_TRANSFER_TOP_SHOT_MOMENT_MAINNET},
+        {SCRIPT_TS02_TRANSFER_TOP_SHOT_MOMENT,
+         (char *) TEMPLATE_HASH_TS02_TRANSFER_TOP_SHOT_MOMENT_TESTNET},
+        {SCRIPT_TS02_TRANSFER_TOP_SHOT_MOMENT,
+         (char *) TEMPLATE_HASH_TS02_TRANSFER_TOP_SHOT_MOMENT_MAINNET},
 
-        {SCRIPT_USDC01_SETUP_USDC_VAULT, (char *)TEMPLATE_HASH_USDC01_SETUP_USDC_VAULT_TESTNET},
-        {SCRIPT_USDC01_SETUP_USDC_VAULT, (char *)TEMPLATE_HASH_USDC01_SETUP_USDC_VAULT_MAINNET},
+        {SCRIPT_USDC01_SETUP_USDC_VAULT, (char *) TEMPLATE_HASH_USDC01_SETUP_USDC_VAULT_TESTNET},
+        {SCRIPT_USDC01_SETUP_USDC_VAULT, (char *) TEMPLATE_HASH_USDC01_SETUP_USDC_VAULT_MAINNET},
 
-        {SCRIPT_USDC02_TRANSFER_USDC, (char *)TEMPLATE_HASH_USDC02_TRANSFER_USDC_TESTNET},
-        {SCRIPT_USDC02_TRANSFER_USDC, (char *)TEMPLATE_HASH_USDC02_TRANSFER_USDC_MAINNET},
+        {SCRIPT_USDC02_TRANSFER_USDC, (char *) TEMPLATE_HASH_USDC02_TRANSFER_USDC_TESTNET},
+        {SCRIPT_USDC02_TRANSFER_USDC, (char *) TEMPLATE_HASH_USDC02_TRANSFER_USDC_MAINNET},
 
-        {SCRIPT_SCO03_REGISTER_NODE, (char *)TEMPLATE_HASH_SCO0302_REGISTER_NODE_TESTNET},
-        {SCRIPT_SCO03_REGISTER_NODE, (char *)TEMPLATE_HASH_SCO0302_REGISTER_NODE_MAINNET},
+        {SCRIPT_SCO03_REGISTER_NODE, (char *) TEMPLATE_HASH_SCO0302_REGISTER_NODE_TESTNET},
+        {SCRIPT_SCO03_REGISTER_NODE, (char *) TEMPLATE_HASH_SCO0302_REGISTER_NODE_MAINNET},
 
-        {SCRIPT_SCO04_CREATE_MACHINE_ACCOUNT, (char *)TEMPLATE_HASH_SCO0402_CREATE_MACHINE_ACCOUNT_TESTNET},
-        {SCRIPT_SCO04_CREATE_MACHINE_ACCOUNT, (char *)TEMPLATE_HASH_SCO0402_CREATE_MACHINE_ACCOUNT_MAINNET},
+        {SCRIPT_SCO04_CREATE_MACHINE_ACCOUNT,
+         (char *) TEMPLATE_HASH_SCO0402_CREATE_MACHINE_ACCOUNT_TESTNET},
+        {SCRIPT_SCO04_CREATE_MACHINE_ACCOUNT,
+         (char *) TEMPLATE_HASH_SCO0402_CREATE_MACHINE_ACCOUNT_MAINNET},
 
         // sentinel, do not remove
-        {0, NULL}
-    };
+        {0, NULL}};
 
     int i = 0;
     while (KNOWN_TYPES[i].template) {
@@ -610,7 +677,8 @@ parser_error_t _readProposalKeyId(parser_context_t *c, flow_proposal_keyid_t *v)
     return PARSER_OK;
 }
 
-parser_error_t _readProposalKeySequenceNumber(parser_context_t *c, flow_proposal_key_sequence_number_t *v) {
+parser_error_t _readProposalKeySequenceNumber(parser_context_t *c,
+                                              flow_proposal_key_sequence_number_t *v) {
     rlp_kind_e kind;
     uint32_t bytesConsumed;
     parser_context_t ctx_local;
@@ -639,7 +707,6 @@ parser_error_t _readPayer(parser_context_t *c, flow_payer_t *v) {
 }
 
 parser_error_t _readProposalAuthorizer(parser_context_t *c, flow_proposal_authorizer_t *v) {
-
     rlp_kind_e kind;
     uint32_t bytesConsumed;
 
@@ -664,7 +731,7 @@ parser_error_t _readProposalAuthorizers(parser_context_t *c, flow_proposal_autho
 
     while (v->ctx.offset < v->ctx.bufferLen) {
         if (v->authorizer_count >= 16) {
-           return PARSER_UNEXPECTED_NUMBER_ITEMS;
+            return PARSER_UNEXPECTED_NUMBER_ITEMS;
         }
 
         CHECK_PARSER_ERR(_readProposalAuthorizer(&v->ctx, &v->authorizer[v->authorizer_count]))
@@ -704,7 +771,8 @@ parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
     CHECK_PARSER_ERR(_readGasLimit(&ctx_rootInnerList, &v->gasLimit))
     CHECK_PARSER_ERR(_readProposalKeyAddress(&ctx_rootInnerList, &v->proposalKeyAddress))
     CHECK_PARSER_ERR(_readProposalKeyId(&ctx_rootInnerList, &v->proposalKeyId))
-    CHECK_PARSER_ERR(_readProposalKeySequenceNumber(&ctx_rootInnerList, &v->proposalKeySequenceNumber))
+    CHECK_PARSER_ERR(
+        _readProposalKeySequenceNumber(&ctx_rootInnerList, &v->proposalKeySequenceNumber))
     CHECK_PARSER_ERR(_readPayer(&ctx_rootInnerList, &v->payer))
     CHECK_PARSER_ERR(_readProposalAuthorizers(&ctx_rootInnerList, &v->authorizers))
 
@@ -724,8 +792,10 @@ parser_error_t _validateTx(__Z_UNUSED const parser_context_t *c, __Z_UNUSED cons
     return PARSER_OK;
 }
 
-parser_error_t _countArgumentItems(const flow_argument_list_t *v, uint8_t argumentIndex,
-                                   uint8_t max_number_of_items, uint8_t *number_of_items) {
+parser_error_t _countArgumentItems(const flow_argument_list_t *v,
+                                   uint8_t argumentIndex,
+                                   uint8_t max_number_of_items,
+                                   uint8_t *number_of_items) {
     *number_of_items = 0;
     parsed_json_t parsedJson = {false};
 
@@ -738,9 +808,11 @@ parser_error_t _countArgumentItems(const flow_argument_list_t *v, uint8_t argume
 
     // Get number of items
     uint16_t internalTokenElementIdx;
-    CHECK_PARSER_ERR(json_matchKeyValue(&parsedJson, 0, (char *) "Array", JSMN_ARRAY, &internalTokenElementIdx));
+    CHECK_PARSER_ERR(
+        json_matchKeyValue(&parsedJson, 0, (char *) "Array", JSMN_ARRAY, &internalTokenElementIdx));
     uint16_t arrayTokenCount;
-    CHECK_PARSER_ERR(array_get_element_count(&parsedJson, internalTokenElementIdx, &arrayTokenCount));
+    CHECK_PARSER_ERR(
+        array_get_element_count(&parsedJson, internalTokenElementIdx, &arrayTokenCount));
     if (arrayTokenCount > max_number_of_items) {
         return PARSER_UNEXPECTED_NUMBER_ITEMS;
     }
@@ -749,9 +821,11 @@ parser_error_t _countArgumentItems(const flow_argument_list_t *v, uint8_t argume
     return PARSER_OK;
 }
 
-//if Optional is null, number_of_items is set to 1 as one screen is needed to display "None"
-parser_error_t _countArgumentOptionalItems(const flow_argument_list_t *v, uint8_t argumentIndex,
-                                           uint8_t max_number_of_items, uint8_t *number_of_items) {
+// if Optional is null, number_of_items is set to 1 as one screen is needed to display "None"
+parser_error_t _countArgumentOptionalItems(const flow_argument_list_t *v,
+                                           uint8_t argumentIndex,
+                                           uint8_t max_number_of_items,
+                                           uint8_t *number_of_items) {
     *number_of_items = 0;
     parsed_json_t parsedJson = {false};
 
@@ -771,7 +845,8 @@ parser_error_t _countArgumentOptionalItems(const flow_argument_list_t *v, uint8_
 
     // Get number of items
     uint16_t arrayTokenCount;
-    CHECK_PARSER_ERR(array_get_element_count(&parsedJson, internalTokenElementIdx, &arrayTokenCount));
+    CHECK_PARSER_ERR(
+        array_get_element_count(&parsedJson, internalTokenElementIdx, &arrayTokenCount));
     if (arrayTokenCount > max_number_of_items) {
         return PARSER_UNEXPECTED_NUMBER_ITEMS;
     }
@@ -780,10 +855,13 @@ parser_error_t _countArgumentOptionalItems(const flow_argument_list_t *v, uint8_
     return PARSER_OK;
 }
 
-parser_error_t _getNumItems(__Z_UNUSED const parser_context_t *c, const parser_tx_t *v, uint8_t *numItems) {
+parser_error_t _getNumItems(__Z_UNUSED const parser_context_t *c,
+                            const parser_tx_t *v,
+                            uint8_t *numItems) {
     uint8_t argArrayLength = 0;
 
-    uint8_t show_address_yes = (show_address == SHOW_ADDRESS_YES || show_address == SHOW_ADDRESS_YES_HASH_MISMATCH);
+    uint8_t show_address_yes =
+        (show_address == SHOW_ADDRESS_YES || show_address == SHOW_ADDRESS_YES_HASH_MISMATCH);
     uint8_t extraItems = v->authorizers.authorizer_count;
     extraItems += (show_address_yes && !addressUsedInTx) ? 1 : 0;
     extraItems += (show_address == SHOW_ADDRESS_YES_HASH_MISMATCH) ? 1 : 0;
@@ -792,10 +870,10 @@ parser_error_t _getNumItems(__Z_UNUSED const parser_context_t *c, const parser_t
 
     switch (v->script.type) {
         case SCRIPT_TOKEN_TRANSFER:
-            *numItems = 10  + extraItems;
+            *numItems = 10 + extraItems;
             return PARSER_OK;
         case SCRIPT_CREATE_ACCOUNT:
-            //array length is checked while we are parsing it
+            // array length is checked while we are parsing it
             CHECK_PARSER_ERR(_countArgumentItems(&v->arguments, 0, UINT8_MAX, &argArrayLength))
             *numItems = 8 + argArrayLength + extraItems;
             return PARSER_OK;
@@ -866,12 +944,13 @@ parser_error_t _getNumItems(__Z_UNUSED const parser_context_t *c, const parser_t
             *numItems = 10 + extraItems;
             return PARSER_OK;
         case SCRIPT_SCO03_REGISTER_NODE:
-            //array length is checked while we are parsing it
-            CHECK_PARSER_ERR(_countArgumentOptionalItems(&v->arguments, 6, UINT8_MAX, &argArrayLength));
+            // array length is checked while we are parsing it
+            CHECK_PARSER_ERR(
+                _countArgumentOptionalItems(&v->arguments, 6, UINT8_MAX, &argArrayLength));
             *numItems = 14 + argArrayLength + extraItems;
             return PARSER_OK;
         case SCRIPT_SCO04_CREATE_MACHINE_ACCOUNT:
-            //array length is checked while we are parsing it
+            // array length is checked while we are parsing it
             CHECK_PARSER_ERR(_countArgumentItems(&v->arguments, 1, UINT8_MAX, &argArrayLength))
             *numItems = 9 + argArrayLength + extraItems;
             return PARSER_OK;
@@ -927,7 +1006,7 @@ parser_error_t _getNumItems(__Z_UNUSED const parser_context_t *c, const parser_t
             *numItems = 8 + extraItems;
             return PARSER_OK;
         case SCRIPT_USDC02_TRANSFER_USDC:
-            *numItems = 10 +   extraItems;
+            *numItems = 10 + extraItems;
             return PARSER_OK;
         case SCRIPT_UNKNOWN:
         default:
@@ -938,14 +1017,14 @@ parser_error_t _getNumItems(__Z_UNUSED const parser_context_t *c, const parser_t
 void checkAddressUsedInTx() {
     addressUsedInTx = 0;
     int authCount = parser_tx_obj.authorizers.authorizer_count;
-    for(uint8_t i=0; i<authCount+2; i++) { //+2 for proposer and payer
+    for (uint8_t i = 0; i < authCount + 2; i++) {  //+2 for proposer and payer
         parser_context_t *ctx = &parser_tx_obj.payer.ctx;
         if (i == authCount) ctx = &parser_tx_obj.proposalKeyAddress.ctx;
         if (i < authCount) ctx = &parser_tx_obj.authorizers.authorizer[i].ctx;
 
         STATIC_ASSERT(sizeof(address_to_display) == ACCOUNT_SIZE, "Incorrect address length");
         if (ctx->bufferLen == ACCOUNT_SIZE) {
-            if(!MEMCMP(ctx->buffer, &address_to_display, sizeof(address_to_display))) {
+            if (!MEMCMP(ctx->buffer, &address_to_display, sizeof(address_to_display))) {
                 addressUsedInTx = 1;
                 break;
             }

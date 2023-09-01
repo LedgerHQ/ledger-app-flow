@@ -1,24 +1,24 @@
 /*******************************************************************************
-*   (c) 2018-2020 Zondax GmbH
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   (c) 2018-2020 Zondax GmbH
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 #include <jsmn.h>
 #include <zxmacros.h>
 #include "json_parser.h"
 
-#define EQUALS(_P, _Q, _LEN) (MEMCMP( (void *) PIC(_P), (void *) PIC(_Q), (_LEN))==0)
+#define EQUALS(_P, _Q, _LEN) (MEMCMP((void *) PIC(_P), (void *) PIC(_Q), (_LEN)) == 0)
 
 parser_error_t json_parse(parsed_json_t *parsed_json, const char *buffer, uint16_t bufferLen) {
     jsmn_parser parser;
@@ -28,12 +28,11 @@ parser_error_t json_parse(parsed_json_t *parsed_json, const char *buffer, uint16
     parsed_json->buffer = buffer;
     parsed_json->bufferLen = bufferLen;
 
-    int32_t num_tokens = jsmn_parse(
-            &parser,
-            parsed_json->buffer,
-            parsed_json->bufferLen,
-            parsed_json->tokens,
-            MAX_NUMBER_OF_TOKENS);
+    int32_t num_tokens = jsmn_parse(&parser,
+                                    parsed_json->buffer,
+                                    parsed_json->bufferLen,
+                                    parsed_json->tokens,
+                                    MAX_NUMBER_OF_TOKENS);
 
     if (num_tokens < 0) {
         switch (num_tokens) {
@@ -208,9 +207,9 @@ parser_error_t object_get_nth_value(const parsed_json_t *json,
     }
 
     CHECK_PARSER_ERR(object_get_nth_key(json, object_token_index, object_element_index, key_index));
-    (*key_index) ++;
+    (*key_index)++;
 
-    return  PARSER_OK;
+    return PARSER_OK;
 }
 
 parser_error_t object_get_value(const parsed_json_t *json,
@@ -241,9 +240,7 @@ parser_error_t object_get_value(const parsed_json_t *json,
         prev_element_end = value_token.end;
 
         if (((uint16_t) strlen(key_name)) == (key_token.end - key_token.start)) {
-            if (EQUALS(key_name,
-                       json->buffer + key_token.start,
-                       key_token.end - key_token.start)) {
+            if (EQUALS(key_name, json->buffer + key_token.start, key_token.end - key_token.start)) {
                 return PARSER_OK;
             }
         }

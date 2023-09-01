@@ -1,34 +1,32 @@
 /*******************************************************************************
-*   (c) 2020 Zondax GmbH
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   (c) 2020 Zondax GmbH
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 #include "rlp.h"
 
-#define CHECK_AVAILABLE(ctx, size) \
+#define CHECK_AVAILABLE(ctx, size)                                         \
     if (ctx->offset > ctx->bufferLen) return PARSER_UNEXPECTED_BUFFER_END; \
-    if (ctx->bufferLen - ctx->offset < size ) return PARSER_UNEXPECTED_BUFFER_END;
+    if (ctx->bufferLen - ctx->offset < size) return PARSER_UNEXPECTED_BUFFER_END;
 
 #define CHECK_LEN_LEN_MAX(len_len, size) \
     if (len_len > size) return PARSER_RLP_ERROR_INVALID_VALUE_LEN;
 
-parser_error_t rlp_decode(
-        const parser_context_t *input,
-        parser_context_t *outputPayload,
-        rlp_kind_e *outputKind,
-        uint32_t *bytesConsumed) {
-
+parser_error_t rlp_decode(const parser_context_t *input,
+                          parser_context_t *outputPayload,
+                          rlp_kind_e *outputKind,
+                          uint32_t *bytesConsumed) {
     outputPayload->buffer = input->buffer + input->offset;
     outputPayload->bufferLen = 0;
     outputPayload->offset = 0;
@@ -42,7 +40,7 @@ parser_error_t rlp_decode(
         *outputKind = RLP_KIND_STRING;
         outputPayload->bufferLen = 1;
         outputPayload->buffer += 0;
-        *bytesConsumed = 1; // 1 byte to consume from the stream
+        *bytesConsumed = 1;  // 1 byte to consume from the stream
         CHECK_AVAILABLE(input, *bytesConsumed)
         return PARSER_OK;
     }
@@ -120,9 +118,7 @@ parser_error_t rlp_readByte(const parser_context_t *ctx, rlp_kind_e kind, uint8_
     return PARSER_OK;
 }
 
-parser_error_t rlp_readUInt64(const parser_context_t *ctx,
-                              rlp_kind_e kind,
-                              uint64_t *value) {
+parser_error_t rlp_readUInt64(const parser_context_t *ctx, rlp_kind_e kind, uint64_t *value) {
     if (kind != RLP_KIND_STRING) {
         return PARSER_RLP_ERROR_INVALID_KIND;
     }

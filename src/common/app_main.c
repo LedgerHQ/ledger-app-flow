@@ -1,19 +1,19 @@
 /*******************************************************************************
-*   (c) 2018, 2019 Zondax GmbH
-*   (c) 2016 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   (c) 2018, 2019 Zondax GmbH
+ *   (c) 2016 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 #include "app_main.h"
 
@@ -33,24 +33,23 @@ unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 
 unsigned char io_event(__Z_UNUSED unsigned char channel) {
     switch (G_io_seproxyhal_spi_buffer[0]) {
-        case SEPROXYHAL_TAG_FINGER_EVENT: //
+        case SEPROXYHAL_TAG_FINGER_EVENT:  //
             UX_FINGER_EVENT(G_io_seproxyhal_spi_buffer);
             break;
 
-        case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT: // for Nano S
+        case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT:  // for Nano S
             UX_BUTTON_PUSH_EVENT(G_io_seproxyhal_spi_buffer);
             break;
 
         case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
-            if (!UX_DISPLAYED())
-                UX_DISPLAYED_EVENT();
+            if (!UX_DISPLAYED()) UX_DISPLAYED_EVENT();
             break;
 
-        case SEPROXYHAL_TAG_TICKER_EVENT: { //
+        case SEPROXYHAL_TAG_TICKER_EVENT: {  //
             UX_TICKER_EVENT(G_io_seproxyhal_spi_buffer, {
-                    if (UX_ALLOWED) {
-                        UX_REDISPLAY();
-                    }
+                if (UX_ALLOWED) {
+                    UX_REDISPLAY();
+                }
             });
             break;
         }
@@ -63,7 +62,7 @@ unsigned char io_event(__Z_UNUSED unsigned char channel) {
     if (!io_seproxyhal_spi_is_status_sent()) {
         io_seproxyhal_general_status();
     }
-    return 1; // DO NOT reset the current APDU transport
+    return 1;  // DO NOT reset the current APDU transport
 }
 
 unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
@@ -79,7 +78,7 @@ unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
                 if (channel & IO_RESET_AFTER_REPLIED) {
                     reset();
                 }
-                return 0; // nothing received from the master so far (it's a tx
+                return 0;  // nothing received from the master so far (it's a tx
                 // transaction)
             } else {
                 return io_seproxyhal_spi_recv(G_io_apdu_buffer, sizeof(G_io_apdu_buffer), 0);
@@ -98,11 +97,9 @@ void extractHDPathAndCryptoOptions(uint32_t rx, uint32_t offset) {
 
     MEMCPY(hdPath.data, G_io_apdu_buffer + offset, sizeof(hdPath.data));
 
-    const bool mainnet = hdPath.data[0] == HDPATH_0_DEFAULT &&
-                         hdPath.data[1] == HDPATH_1_DEFAULT;
+    const bool mainnet = hdPath.data[0] == HDPATH_0_DEFAULT && hdPath.data[1] == HDPATH_1_DEFAULT;
 
-    const bool testnet = hdPath.data[0] == HDPATH_0_TESTNET &&
-                         hdPath.data[1] == HDPATH_1_TESTNET;
+    const bool testnet = hdPath.data[0] == HDPATH_0_TESTNET && hdPath.data[1] == HDPATH_1_TESTNET;
 
     if (!mainnet && !testnet) {
         THROW(APDU_CODE_DATA_INVALID);
@@ -177,15 +174,15 @@ void app_init() {
 #ifdef HAVE_BLE
     // grab the current plane mode setting
     G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
-#endif // HAVE_BLE
+#endif  // HAVE_BLE
 
     USB_power(0);
     USB_power(1);
-    view_idle_show(0, (char *)"Ready");
+    view_idle_show(0, (char *) "Ready");
 
 #ifdef HAVE_BLE
     // Enable Bluetooth
     BLE_power(0, NULL);
     BLE_power(1, "Nano X");
-#endif // HAVE_BLE
+#endif  // HAVE_BLE
 }

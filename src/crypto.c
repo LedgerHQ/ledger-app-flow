@@ -1,18 +1,18 @@
 /*******************************************************************************
-*   (c) 2019 Zondax GmbH
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   (c) 2019 Zondax GmbH
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 #include "crypto.h"
 #include "coin.h"
@@ -24,10 +24,9 @@
 #if defined(TARGET_NANOS) || defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 #include "cx.h"
 
-
 __Z_INLINE digest_type_e get_hash_type(const uint16_t options) {
-    const uint8_t hash_type = (uint8_t) (options & 0xFF);
-    switch(hash_type) {
+    const uint8_t hash_type = (uint8_t)(options & 0xFF);
+    switch (hash_type) {
         case 0x01:
             zemu_log_stack("path: sha2_256");
             return HASH_SHA2_256;
@@ -41,8 +40,8 @@ __Z_INLINE digest_type_e get_hash_type(const uint16_t options) {
 }
 
 __Z_INLINE cx_curve_t get_cx_curve(const uint16_t options) {
-    const uint8_t curve_code = (uint8_t) ((options >> 8) & 0xFF);
-    switch(curve_code) {
+    const uint8_t curve_code = (uint8_t)((options >> 8) & 0xFF);
+    switch (curve_code) {
         case 0x02: {
             zemu_log_stack("curve: secp256r1");
             return CX_CURVE_SECP256R1;
@@ -56,12 +55,15 @@ __Z_INLINE cx_curve_t get_cx_curve(const uint16_t options) {
     }
 }
 
-zxerr_t crypto_extractPublicKey(const hd_path_t path, const uint16_t options, uint8_t *pubKey, uint16_t pubKeyLen) {
+zxerr_t crypto_extractPublicKey(const hd_path_t path,
+                                const uint16_t options,
+                                uint8_t *pubKey,
+                                uint16_t pubKeyLen) {
     zemu_log_stack("crypto_extractPublicKey");
     MEMZERO(pubKey, pubKeyLen);
 
     cx_curve_t curve = get_cx_curve(options);
-    if (curve!=CX_CURVE_SECP256K1 && curve!=CX_CURVE_SECP256R1 ) {
+    if (curve != CX_CURVE_SECP256K1 && curve != CX_CURVE_SECP256R1) {
         zemu_log_stack("extractPublicKey: invalid_crypto_settings");
         return zxerr_invalid_crypto_settings;
     }
@@ -77,14 +79,10 @@ zxerr_t crypto_extractPublicKey(const hd_path_t path, const uint16_t options, ui
     cx_ecfp_private_key_t cx_privateKey;
     uint8_t privateKeyData[32];
 
-    BEGIN_TRY
-    {
+    BEGIN_TRY {
         TRY {
             zemu_log_stack("extractPublicKey: derive_node_bip32");
-            os_perso_derive_node_bip32(curve,
-                                       path.data,
-                                       HDPATH_LEN_DEFAULT,
-                                       privateKeyData, NULL);
+            os_perso_derive_node_bip32(curve, path.data, HDPATH_LEN_DEFAULT, privateKeyData, NULL);
 
             zemu_log_stack("extractPublicKey: cx_ecfp_init_private_key");
             cx_ecfp_init_private_key(curve, privateKeyData, 32, &cx_privateKey);
@@ -118,8 +116,13 @@ void sha256(const uint8_t *message, uint16_t messageLen, uint8_t message_digest[
     cx_hash_sha256(message, messageLen, message_digest, CX_SHA256_SIZE);
 }
 
-zxerr_t digest_message(const uint8_t *message, uint16_t messageLen, digest_type_e hash_kind, uint8_t *digest, uint16_t digestMax,  uint16_t* digest_size) {
-    switch(hash_kind) {
+zxerr_t digest_message(const uint8_t *message,
+                       uint16_t messageLen,
+                       digest_type_e hash_kind,
+                       uint8_t *digest,
+                       uint16_t digestMax,
+                       uint16_t *digest_size) {
+    switch (hash_kind) {
         case HASH_SHA2_256: {
             zemu_log_stack("sha2_256");
             if (digestMax < CX_SHA256_SIZE) {
@@ -137,7 +140,7 @@ zxerr_t digest_message(const uint8_t *message, uint16_t messageLen, digest_type_
             zemu_log_stack("sha3_256");
             cx_sha3_t sha3;
             cx_sha3_init(&sha3, 256);
-            cx_hash((cx_hash_t*)&sha3, CX_LAST, message, messageLen, digest, 32);
+            cx_hash((cx_hash_t *) &sha3, CX_LAST, message, messageLen, digest, 32);
             zemu_log_stack("sha3_256 ready");
             *digest_size = 32;
             return zxerr_ok;
@@ -149,11 +152,17 @@ zxerr_t digest_message(const uint8_t *message, uint16_t messageLen, digest_type_
     }
 }
 
-zxerr_t crypto_sign(const hd_path_t path, const uint16_t options, const uint8_t *message, uint16_t messageLen, uint8_t *buffer, uint16_t bufferSize,  uint16_t *sigSize) {
+zxerr_t crypto_sign(const hd_path_t path,
+                    const uint16_t options,
+                    const uint8_t *message,
+                    uint16_t messageLen,
+                    uint8_t *buffer,
+                    uint16_t bufferSize,
+                    uint16_t *sigSize) {
     zemu_log_stack("crypto_sign");
 
     cx_curve_t curve = get_cx_curve(options);
-    if (curve!=CX_CURVE_SECP256K1 && curve!=CX_CURVE_SECP256R1 ) {
+    if (curve != CX_CURVE_SECP256K1 && curve != CX_CURVE_SECP256R1) {
         zemu_log_stack("crypto_sign: invalid_crypto_settings");
         return zxerr_invalid_crypto_settings;
     }
@@ -163,7 +172,12 @@ zxerr_t crypto_sign(const hd_path_t path, const uint16_t options, const uint8_t 
     uint8_t messageDigest[32];
     uint16_t messageDigestSize = 0;
 
-    CHECK_ZXERR(digest_message(message, messageLen, cx_hash_kind, messageDigest, sizeof(messageDigest), &messageDigestSize));
+    CHECK_ZXERR(digest_message(message,
+                               messageLen,
+                               cx_hash_kind,
+                               messageDigest,
+                               sizeof(messageDigest),
+                               &messageDigestSize));
 
     if (messageDigestSize != 32) {
         zemu_log_stack("crypto_sign: zxerr_out_of_bounds");
@@ -182,16 +196,11 @@ zxerr_t crypto_sign(const hd_path_t path, const uint16_t options, const uint8_t 
     }
     signature_t *const signature = (signature_t *) buffer;
 
-    BEGIN_TRY
-    {
-        TRY
-        {
+    BEGIN_TRY {
+        TRY {
             // Generate keys
             zemu_log_stack("derive path");
-            os_perso_derive_node_bip32(curve,
-                                       path.data,
-                                       HDPATH_LEN_DEFAULT,
-                                       privateKeyData, NULL);
+            os_perso_derive_node_bip32(curve, path.data, HDPATH_LEN_DEFAULT, privateKeyData, NULL);
 
             cx_ecfp_init_private_key(curve, privateKeyData, 32, &cx_privateKey);
 
@@ -214,14 +223,16 @@ zxerr_t crypto_sign(const hd_path_t path, const uint16_t options, const uint8_t 
     }
     END_TRY;
 
-    err_convert_e err = convertDERtoRSV(signature->der_signature, info,  signature->r, signature->s, &signature->v);
+    err_convert_e err =
+        convertDERtoRSV(signature->der_signature, info, signature->r, signature->s, &signature->v);
     if (err != no_error) {
         // Error while converting so return length 0
         return zxerr_invalid_crypto_settings;
     }
 
     // return actual size using value from signatureLength
-    *sigSize = sizeof_field(signature_t, r) + sizeof_field(signature_t, s) + sizeof_field(signature_t, v) + signatureLength;
+    *sigSize = sizeof_field(signature_t, r) + sizeof_field(signature_t, s) +
+               sizeof_field(signature_t, v) + signatureLength;
     return zxerr_ok;
 }
 
