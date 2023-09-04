@@ -27,13 +27,21 @@ The general structure of commands and responses is as follows:
 | Return code | Description             |
 | ----------- | ----------------------- |
 | 0x6400      | Execution Error         |
+| 0x6700      | Wrong length            |
 | 0x6982      | Empty buffer            |
 | 0x6983      | Output buffer too small |
+| 0x6984      | Data invalid            |
+| 0x6985      | Conditions not stisfied |
 | 0x6986      | Command not allowed     |
+| 0x6987      | Tx not initialized      |
+| 0x6A80      | Bad key handle          |
+| 0x6B00      | Invalid P1 - P2         |
 | 0x6D00      | INS not supported       |
 | 0x6E00      | CLA not supported       |
 | 0x6F00      | Unknown                 |
+| 0x6F01      | Sign verify error       |
 | 0x9000      | Success                 |
+| 0x9001      | Busy                    |
 
 ---
 
@@ -89,9 +97,11 @@ Each slot has the following structure
 
 ---
 
-## Command definition
+## Commands definition
 
 ### GET_VERSION
+
+Returns the App version.
 
 #### Command
 
@@ -112,11 +122,14 @@ Each slot has the following structure
 | MINOR   | byte (1) | Version Minor    |                                 |
 | PATCH   | byte (1) | Version Patch    |                                 |
 | LOCKED  | byte (1) | Device is locked |                                 |
+| DEV_ID  | byte (4) | Device_ID        | see values in each sdk          |
 | SW1-SW2 | byte (2) | Return code      | see list of return codes        |
 
 ---
 
 ### INS_GET_PUBKEY
+
+Returns the public key.
 
 #### Command
 
@@ -136,16 +149,14 @@ Each slot has the following structure
 
 #### Response
 
-| Field      | Type      | Content           | Note                     |
-| ---------- | --------- | ----------------- | ------------------------ |
-| PK         | byte (65) | Public Key        |                          |
-| ADDR_B_LEN | byte (1)  | ADDR_B Length     |                          |
-| ADDR_B     | byte (??) | Address as Bytes  |                          |
-| ADDR_S_LEN | byte (1)  | ADDR_S Len        |                          |
-| ADDR_S     | byte (??) | Address as String |                          |
-| SW1-SW2    | byte (2)  | Return code       | see list of return codes |
+| Field    | Type        | Content     | Note           |
+| -------- | ----------- | ----------- | -------------- |
+| PK       | byte (65)   | Public Key  | binary encoded |
+| PK-ASCII | byte (65x2) | Public key  | ascii encoded  |
 
 ### INS_SIGN
+
+Signs a transaction. The payload contains the transaction, split according to the size limit.
 
 #### Command
 
@@ -188,17 +199,21 @@ Data is defined as:
 
 #### Response
 
-| Field       | Type            | Content     | Note                     |
-| ----------- | --------------- | ----------- | ------------------------ |
-| secp256k1 R | byte (32)       | Signature   |                          |
-| secp256k1 S | byte (32)       | Signature   |                          |
-| secp256k1 V | byte (1)        | Signature   |                          |
-| SIG         | byte (variable) | Signature   | DER format               |
-| SW1-SW2     | byte (2)        | Return code | see list of return codes |
+| Field       | Type            | Content     | Note                      |
+| ----------- | --------------- | ----------- | ------------------------- |
+| R length    | byte (1)        | Length      | R field                   |
+| R field     | byte (32)       | Signature   | R field                   |
+| S length    | byte (1)        | Length      | S field                   |
+| S field     | byte (32)       | Signature   | S field                   |
+| V field     | byte (1)        | Signature   | V field                   |
+| SIG         | byte (variable) | Signature   | DER format (max 73 bytes) |
+| SW1-SW2     | byte (2)        | Return code | see list of return codes  |
 
 ---
 
 ### INS_GET_SLOTS_STATUS
+
+Returns the slots status (free/used).
 
 #### Command
 
@@ -206,9 +221,8 @@ Data is defined as:
 | ----- | -------- | ------------------------- | -------- |
 | CLA   | byte (1) | Application Identifier    | 0x33     |
 | INS   | byte (1) | Instruction ID            | 0x11     |
-| P1    | byte (1) | Request User confirmation | No = 0   |
+| P1    | byte (1) | Parameter 1               | ignored  |
 | P2    | byte (1) | Parameter 2               | ignored  |
-| L     | byte (1) | Bytes in payload          | 0        |
 
 #### Response
 
@@ -218,13 +232,15 @@ Data is defined as:
 
 ### INS_GET_SLOT
 
+Returns the slot account.
+
 #### Command
 
 | Field | Type     | Content                   | Expected |
 | ----- | -------- | ------------------------- | -------- |
 | CLA   | byte (1) | Application Identifier    | 0x33     |
 | INS   | byte (1) | Instruction ID            | 0x11     |
-| P1    | byte (1) | Request User confirmation | No = 0   |
+| P1    | byte (1) | Parameter 1               | ignored  |
 | P2    | byte (1) | Parameter 2               | ignored  |
 | L     | byte (1) | Bytes in payload          | 1        |
 | Slot  | byte (1) | Slot Index                | 0..63    |
@@ -246,6 +262,8 @@ Setting the slot to all zeros, will remove the data, otherwise,
 the slot needs to have a valid derivation path
 
 ### INS_SET_SLOT
+
+Set the slot with account information.
 
 #### Command
 
