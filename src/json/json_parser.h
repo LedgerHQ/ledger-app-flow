@@ -69,7 +69,7 @@ parser_error_t json_parse(parsed_json_t *parsed_json,
 /// Get the number of elements in the array
 /// \param json
 /// \param array_token_index
-/// \param number of elements (out)
+/// \param number_elements (out)
 /// \return Error message
 parser_error_t array_get_element_count(const parsed_json_t *json,
                                        uint16_t array_token_index,
@@ -79,7 +79,7 @@ parser_error_t array_get_element_count(const parsed_json_t *json,
 /// \param json
 /// \param array_token_index
 /// \param element_index
-/// \param token index
+/// \param token_index
 /// \return Error message
 parser_error_t array_get_nth_element(const parsed_json_t *json,
                                      uint16_t array_token_index,
@@ -89,7 +89,7 @@ parser_error_t array_get_nth_element(const parsed_json_t *json,
 /// Get the number of dictionary elements (key/value pairs) under given object
 /// \param json
 /// \param object_token_index: token index of the parent object
-/// \param number of elements (out)
+/// \param number_elements (out)
 /// \return Error message
 parser_error_t object_get_element_count(const parsed_json_t *json,
                                         uint16_t object_token_index,
@@ -99,7 +99,7 @@ parser_error_t object_get_element_count(const parsed_json_t *json,
 /// \param json
 /// \param object_token_index: token index of the parent object
 /// \param object_element_index
-/// \return token index (out)
+/// \param token_index (out)
 /// \return Error message
 parser_error_t object_get_nth_key(const parsed_json_t *json,
                                   uint16_t object_token_index,
@@ -110,7 +110,7 @@ parser_error_t object_get_nth_key(const parsed_json_t *json,
 /// \param json
 /// \param object_token_index: token index of the parent object
 /// \param object_element_index
-/// \return token index (out))
+/// \param token_index (out)
 /// \return Error message
 parser_error_t object_get_nth_value(const parsed_json_t *json,
                                     uint16_t object_token_index,
@@ -121,6 +121,7 @@ parser_error_t object_get_nth_value(const parsed_json_t *json,
 /// \param json
 /// \param object_token_index: token index of the parent object
 /// \param key_name: key name of the wanted value
+/// \param token_index (out)
 /// \return Error message
 parser_error_t object_get_value(const parsed_json_t *json,
                                 uint16_t object_token_index,
