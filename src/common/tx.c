@@ -54,10 +54,7 @@ const uint8_t TX_DOMAIN_TAG[DOMAIN_TAG_LENGTH] = {
 #define TX_BUFFER_OFFSET DOMAIN_TAG_LENGTH
 
 void tx_initialize() {
-    buffering_init(ram_buffer,
-                   sizeof(ram_buffer),
-                   (uint8_t *) N_appdata.buffer,
-                   sizeof(N_appdata.buffer));
+    buffering_init(ram_buffer, sizeof(ram_buffer), (uint8_t *) N_appdata.buffer, FLASH_BUFFER_SIZE);
 }
 
 void tx_reset() {

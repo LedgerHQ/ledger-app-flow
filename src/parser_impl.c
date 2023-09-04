@@ -1017,7 +1017,7 @@ parser_error_t _getNumItems(__Z_UNUSED const parser_context_t *c,
 void checkAddressUsedInTx() {
     addressUsedInTx = 0;
     int authCount = parser_tx_obj.authorizers.authorizer_count;
-    for (uint8_t i = 0; i < authCount + 2; i++) {  //+2 for proposer and payer
+    for (int i = 0; i < authCount + 2; i++) {  //+2 for proposer and payer
         parser_context_t *ctx = &parser_tx_obj.payer.ctx;
         if (i == authCount) ctx = &parser_tx_obj.proposalKeyAddress.ctx;
         if (i < authCount) ctx = &parser_tx_obj.authorizers.authorizer[i].ctx;
