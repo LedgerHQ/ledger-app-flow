@@ -39,17 +39,10 @@
 #define INS_SLOT_GET    0x11
 #define INS_SLOT_SET    0x12
 
-void app_init();
-
-void app_main();
 
 void extractHDPathAndCryptoOptions(uint32_t rx, uint32_t offset);
 
 bool process_chunk(volatile uint32_t *tx, uint32_t rx);
-
-void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx);
-
-void handle_generic_apdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx);
 
 __Z_INLINE void handle_getversion(__Z_UNUSED volatile uint32_t *flags,
                                   volatile uint32_t *tx,

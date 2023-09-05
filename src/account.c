@@ -225,12 +225,12 @@ zxerr_t slot_parseSlot(uint8_t *buffer, uint16_t bufferLen) {
         return zxerr_out_of_bounds;
     }
 
-    STATIC_ASSERT(sizeof(apduData->account) == sizeof(tmp_slot.account),
+    _Static_assert(sizeof(apduData->account) == sizeof(tmp_slot.account),
                   "Incompatible account types.");
     MEMCPY(&tmp_slot.account, &apduData->account, sizeof(apduData->account));
-    STATIC_ASSERT(sizeof(apduData->path) == sizeof(tmp_slot.path), "Incompatible path types.");
+    _Static_assert(sizeof(apduData->path) == sizeof(tmp_slot.path), "Incompatible path types.");
     MEMCPY(&tmp_slot.path, &apduData->path, sizeof(apduData->path));
-    STATIC_ASSERT(sizeof(apduData->options) == sizeof(tmp_slot.options),
+    _Static_assert(sizeof(apduData->options) == sizeof(tmp_slot.options),
                   "Incompatible option types.");
     MEMCPY(&tmp_slot.options, &apduData->options, sizeof(apduData->options));
 
@@ -279,12 +279,12 @@ zxerr_t slot_serializeSlot(const account_slot_t *slot, uint8_t *buffer, uint16_t
         return zxerr_encoding_failed;
     }
 
-    STATIC_ASSERT(sizeof(apduData->account) == sizeof(slot->account),
+    _Static_assert(sizeof(apduData->account) == sizeof(slot->account),
                   "Incompatible account types.");
     MEMCPY(&apduData->account, &slot->account, sizeof(apduData->account));
-    STATIC_ASSERT(sizeof(apduData->path) == sizeof(slot->path), "Incompatible path types.");
+    _Static_assert(sizeof(apduData->path) == sizeof(slot->path), "Incompatible path types.");
     MEMCPY(&apduData->path, &slot->path, sizeof(apduData->path));
-    STATIC_ASSERT(sizeof(apduData->options) == sizeof(slot->options), "Incompatible option types.");
+    _Static_assert(sizeof(apduData->options) == sizeof(slot->options), "Incompatible option types.");
     MEMCPY(&apduData->options, &slot->options, sizeof(apduData->options));
 
     *bufferLen = sizeof(*apduData);
@@ -311,7 +311,7 @@ void loadAddressFromSlot(uint8_t hasHdPath) {
         show_address = SHOW_ADDRESS_EMPTY_SLOT;
     } else {
         // Case 2 Slot 0 derivation path is not the same as APDU derivation path (including curve)
-        STATIC_ASSERT(sizeof(slot.path.data) == sizeof(hdPath.data),
+        _Static_assert(sizeof(slot.path.data) == sizeof(hdPath.data),
                       "Incompatible derivation path types");
         if (hasHdPath && (memcmp(slot.path.data, hdPath.data, sizeof(hdPath.data)) ||
                           ((slot.options & 0xFF00) !=
@@ -319,7 +319,7 @@ void loadAddressFromSlot(uint8_t hasHdPath) {
             show_address = SHOW_ADDRESS_HDPATHS_NOT_EQUAL;
         } else {
             // Case 3 Everything is OK
-            STATIC_ASSERT(sizeof(address_to_display.data) == sizeof(slot.account.data),
+            _Static_assert(sizeof(address_to_display.data) == sizeof(slot.account.data),
                           "Incompatible address types");
             memcpy(address_to_display.data, slot.account.data, sizeof(address_to_display.data));
             if (hasHdPath && ((slot.options & 0x00FF) != (cryptoOptions & 0x00FF))) {
@@ -330,7 +330,7 @@ void loadAddressFromSlot(uint8_t hasHdPath) {
 
             // load hdPath from slot if necessary
             if (!hasHdPath) {
-                STATIC_ASSERT(sizeof(hdPath.data) == sizeof(slot.path.data),
+                _Static_assert(sizeof(hdPath.data) == sizeof(slot.path.data),
                               "Incompatible derivation path types");
                 memcpy(hdPath.data, slot.path.data, sizeof(hdPath.data));
                 cryptoOptions = slot.options;

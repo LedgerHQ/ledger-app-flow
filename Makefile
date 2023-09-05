@@ -41,6 +41,7 @@ APP_SOURCE_PATH += src
 APP_SOURCE_PATH += deps/ledger-zxlib/include
 APP_SOURCE_PATH += deps/ledger-zxlib/src
 APP_SOURCE_PATH += deps/ledger-zxlib/app/common
+APP_SOURCE_PATH += deps/ledger-zxlib/app/ui
 APP_SOURCE_PATH += deps/jsmn/src
 
 # Application icons following guidelines:
@@ -136,7 +137,6 @@ endif
 
 CFLAGS += -O3 -Os -Wno-unknown-pragmas
 LDFLAGS  += -O3 -Os
-SDK_SOURCE_PATH  += lib_ux
 
 # Import generic rules from the SDK
 include $(BOLOS_SDK)/Makefile.standard_app

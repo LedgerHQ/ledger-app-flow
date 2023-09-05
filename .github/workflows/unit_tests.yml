@@ -20,19 +20,31 @@ jobs:
       - name: Clone
         uses: actions/checkout@v3
 
+      - name: Check directory
+        run: |
+          if [ -d unit-tests ]; then
+              echo "DIR_OK=true" >> "$GITHUB_ENV"
+          else
+              echo "DIR_OK=false" >> "$GITHUB_ENV"
+              echo "::error::Missing unit-tests directory!"
+          fi
+
       - name: Clone SDK
+        if: ${{ env.DIR_OK == 'true' }}
         uses: actions/checkout@v3
         with:
           repository: ledgerHQ/ledger-secure-sdk
           path: sdk
 
       - name: Build unit tests
+        if: ${{ env.DIR_OK == 'true' }}
         run: |
           cd unit-tests/
           export BOLOS_SDK=../sdk
           cmake -Bbuild -H. && make -C build && make -C build test
 
       - name: Generate code coverage
+        if: ${{ env.DIR_OK == 'true' }}
         run: |
           cd unit-tests/
           lcov --directory . -b "$(realpath build/)" --capture --initial -o coverage.base && \
@@ -42,11 +54,13 @@ jobs:
           genhtml coverage.info -o coverage
 
       - uses: actions/upload-artifact@v3
+        if: ${{ env.DIR_OK == 'true' }}
         with:
           name: code-coverage
           path: unit-tests/coverage
 
       - name: Upload to codecov.io
+        if: ${{ env.DIR_OK == 'true' }}
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

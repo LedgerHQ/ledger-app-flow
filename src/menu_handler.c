@@ -33,7 +33,7 @@ void handleMenuShowAddress() {
     }
 
     view_review_init(addr_getItem, addr_getNumItems, menuaddr_return);
-    view_review_show();
+    view_review_show(REVIEW_ADDRESS);
 
     return;
 }

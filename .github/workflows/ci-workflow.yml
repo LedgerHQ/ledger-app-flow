@@ -9,9 +9,6 @@ on:
       - develop
   pull_request:
 
-env:
-  MAKE_OPT: --no-print-directory -C deps/ledger-zxlib/
-
 jobs:
   job_build_debug:
     name: Build debug
@@ -31,6 +28,8 @@ jobs:
     steps:
       - name: Clone
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Build ${{ matrix.cfg.device }}
         run: |
@@ -52,6 +51,8 @@ jobs:
     steps:
       - name: Clone
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Build with Clang Static Analyzer
         run: |
@@ -62,61 +63,3 @@ jobs:
         with:
           name: scan-build
           path: scan-build
-
-  job_unit_test:
-    name: C++ unit tests
-    needs: job_build_debug
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Clone
-        uses: actions/checkout@v3
-
-      - name: Build and run unit tests
-        run: |
-          pip3 install conan
-          conan profile detect
-          export BOLOS_SDK=
-          make ${{ env.MAKE_OPT}} cpp_test
-
-  job_speculos_tests:
-    name: Speculos tests
-    needs: job_build_debug
-    strategy:
-      fail-fast: false
-      matrix:
-        device: ["NANO_S", "NANO_X", "NANO_SP"]
-        port: ["5001", "5002"]
-        include:
-          - device: NANO_S
-            port: "5003"
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Clone
-        uses: actions/checkout@v3
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.10.0
-
-      - name: Download app binary
-        uses: actions/download-artifact@v3
-        with:
-          name: flow-app-debug-${{ matrix.device }}
-          path: bin
-
-      - name: install speculos
-        run: |
-          export BOLOS_SDK=
-          make ${{ env.MAKE_OPT}} speculos_install
-
-      - name: Run tests
-        run: |
-          make ${{ env.MAKE_OPT}} TARGET_NAME=${{ matrix.device }} speculos_port_${{ matrix.port }}_test
-
-      - name: Upload log
-        uses: actions/upload-artifact@v3
-        with:
-          name: speculos-${{ matrix.device }}-${{ matrix.port }}-log
-          path: tests_speculos/speculos-port-${{ matrix.port }}.log

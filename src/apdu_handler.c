@@ -54,9 +54,9 @@ __Z_INLINE void handleGetPubkey(volatile uint32_t *flags, volatile uint32_t *tx,
     hasPubkey = true;
 
     // We prepare apdu response, as of now, it is pubkey and pubkey in hex ...
-    STATIC_ASSERT(sizeof(G_io_apdu_buffer) > SECP256_PK_LEN + 2 * SECP256_PK_LEN + 1,
+    _Static_assert(sizeof(G_io_apdu_buffer) > SECP256_PK_LEN + 2 * SECP256_PK_LEN + 1,
                   "IO Buffer too small");
-    STATIC_ASSERT(sizeof(pubkey_to_display) == SECP256_PK_LEN, "Buffer too small");
+    _Static_assert(sizeof(pubkey_to_display) == SECP256_PK_LEN, "Buffer too small");
     memmove(G_io_apdu_buffer, pubkey_to_display, sizeof(pubkey_to_display));
     const uint16_t remainingLength = sizeof(G_io_apdu_buffer) - SECP256_PK_LEN;
     uint32_t len = array_to_hexstr((char *) (G_io_apdu_buffer + SECP256_PK_LEN),
@@ -67,7 +67,7 @@ __Z_INLINE void handleGetPubkey(volatile uint32_t *flags, volatile uint32_t *tx,
         zemu_log_stack("Error converting pubkey to hex");
         THROW(APDU_CODE_UNKNOWN);
     }
-    STATIC_ASSERT(GET_PUB_KEY_RESPONSE_LENGTH == 3 * SECP256_PK_LEN, "Response length too small");
+    _Static_assert(GET_PUB_KEY_RESPONSE_LENGTH == 3 * SECP256_PK_LEN, "Response length too small");
 
     if (requireConfirmation) {
         loadAddressCompareHdPathFromSlot();
@@ -77,7 +77,7 @@ __Z_INLINE void handleGetPubkey(volatile uint32_t *flags, volatile uint32_t *tx,
         }
 
         view_review_init(addr_getItem, addr_getNumItems, app_reply_address);
-        view_review_show();
+        view_review_show(REVIEW_ADDRESS);
 
         *flags |= IO_ASYNCH_REPLY;
         return;
@@ -113,7 +113,7 @@ __Z_INLINE void handleSign(volatile uint32_t *flags, volatile uint32_t *tx, uint
 
     CHECK_APP_CANARY()
     view_review_init(tx_getItem, tx_getNumItems, app_sign);
-    view_review_show();
+    view_review_show(REVIEW_TXN);
     *flags |= IO_ASYNCH_REPLY;
 }
 
@@ -181,7 +181,7 @@ __Z_INLINE void handleSetSlot(volatile uint32_t *flags,
     }
 
     view_review_init(slot_getItem, slot_getNumItems, app_slot_setSlot);
-    view_review_show();
+    view_review_show(REVIEW_TXN);
     *flags |= IO_ASYNCH_REPLY;
 }
 
