@@ -18,7 +18,7 @@
 #include <zxmacros.h>
 #include "parser_impl.h"
 #include "bignum.h"
-#include "parser.h"
+#include "parser_tx.h"
 #include "parser_txdef.h"
 #include "coin.h"
 #include "zxformat.h"

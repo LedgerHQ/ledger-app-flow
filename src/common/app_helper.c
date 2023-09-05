@@ -15,7 +15,7 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#include "app_main.h"
+#include "app_helper.h"
 
 #include <string.h>
 #include <os_io_seproxyhal.h>
