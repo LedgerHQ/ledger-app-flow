@@ -41,6 +41,7 @@ cmake-build-fuzz/
 
 # Others
 /glyphs/icon_app.gif
+/glyphs/icon_stax_64.gif
 
 node_modules/.yarn-integrity
 /fuzz-*.log

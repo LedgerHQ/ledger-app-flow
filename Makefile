@@ -142,7 +142,11 @@ include $(BOLOS_SDK)/Makefile.standard_app
 .PHONY: copy_app_icon
 copy_app_icon:
 	$(info Replacing app icon)
+ifeq ($(TARGET_NAME),TARGET_STAX)
+	cp $(ICONNAME) glyphs/icon_stax_64.gif
+else
 	cp $(ICONNAME) glyphs/icon_app.gif
+endif
 
 .PHONY: delete_app_icon
 delete_app_icon:
