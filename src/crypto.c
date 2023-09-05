@@ -24,6 +24,11 @@
 #if defined(TARGET_NANOS) || defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 #include "cx.h"
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 __Z_INLINE digest_type_e get_hash_type(const uint16_t options) {
     const uint8_t hash_type = (uint8_t)(options & 0xFF);
     switch (hash_type) {
@@ -235,5 +240,9 @@ zxerr_t crypto_sign(const hd_path_t path,
                sizeof_field(signature_t, v) + signatureLength;
     return zxerr_ok;
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 #endif
