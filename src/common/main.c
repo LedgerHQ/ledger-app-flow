@@ -25,17 +25,15 @@ __attribute__((section(".boot"))) int main(void) {
     view_init();
     os_boot();
 
-    BEGIN_TRY
-    {
-        TRY
-        {
+    BEGIN_TRY {
+        TRY {
             app_init();
             app_main();
         }
-        CATCH_OTHER(e)
-        {}
-        FINALLY
-        {}
+        CATCH_OTHER(e) {
+        }
+        FINALLY {
+        }
     }
     END_TRY;
 }

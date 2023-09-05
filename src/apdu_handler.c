@@ -55,7 +55,7 @@ __Z_INLINE void handleGetPubkey(volatile uint32_t *flags, volatile uint32_t *tx,
 
     // We prepare apdu response, as of now, it is pubkey and pubkey in hex ...
     _Static_assert(sizeof(G_io_apdu_buffer) > SECP256_PK_LEN + 2 * SECP256_PK_LEN + 1,
-                  "IO Buffer too small");
+                   "IO Buffer too small");
     _Static_assert(sizeof(pubkey_to_display) == SECP256_PK_LEN, "Buffer too small");
     memmove(G_io_apdu_buffer, pubkey_to_display, sizeof(pubkey_to_display));
     const uint16_t remainingLength = sizeof(G_io_apdu_buffer) - SECP256_PK_LEN;

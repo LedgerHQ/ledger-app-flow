@@ -39,7 +39,6 @@
 #define INS_SLOT_GET    0x11
 #define INS_SLOT_SET    0x12
 
-
 void extractHDPathAndCryptoOptions(uint32_t rx, uint32_t offset);
 
 bool process_chunk(volatile uint32_t *tx, uint32_t rx);
