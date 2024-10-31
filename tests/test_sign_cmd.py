@@ -360,7 +360,6 @@ def test_transaction_manifest(firmware, backend, navigator, test_name):
     for transaction in transactions:
         title_split = transaction["title"].split()
         tx_name = transaction["title"].split()[0]
-        #TODO: fix for tx_name == "SCO.17":
         if len(title_split) > 3 and title_split[-2] == "-":
             tx_name = tx_name+"-"+title_split[-1]
         chain = transaction["chainID"]
