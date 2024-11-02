@@ -178,6 +178,7 @@ class FlowCommandSender:
 
     @contextmanager
     def set_slot(
+        *,
         self,
         slot: int,
         address: str,
@@ -225,6 +226,7 @@ class FlowCommandSender:
 
     @contextmanager
     def sign_tx(
+        *,
         self,
         path: str,
         curve: CurveChoice,

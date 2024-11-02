@@ -41,7 +41,7 @@ def _check_transaction(
     message = bytes.fromhex(transaction)
 
     # Send the APDU (Asynchronous)
-    with client.sign_tx(path, curve, message, hash_t, signable_type):
+    with client.sign_tx(path=path, curve=curve, transaction=message, hash_t=hash_t, hint=signable_type):
         util_navigate(firmware, navigator, test_name, "APPROVE_SIGN", timeout)
 
     # Send the APDU (Asynchronous)
@@ -335,7 +335,7 @@ def test_transaction_refused(firmware, backend, navigator, test_name):
 
     # Send the APDU (Asynchronous)
     with pytest.raises(ExceptionRAPDU) as err:
-        with client.sign_tx(path, curve, message, hash_t, scriptHash):
+        with client.sign_tx(path=path, curve=curve, transaction=message, hash_t=hash_t, hint=scriptHash):
             util_navigate(firmware, navigator, test_name, "REJECT_SIGN")
 
     # Assert we have received a refusal
@@ -443,7 +443,7 @@ class Test_MESSAGE():
 
             # Send the APDU (Asynchronous)
             with pytest.raises(ExceptionRAPDU) as err:
-                with client.sign_tx(path, cfg["curve"], message, cfg["hash"], "message"):
+                with client.sign_tx(path=path, curve=cfg["curve"], transaction=message, hash_t=cfg["hash"], hint="message"):
                     pass
             assert(str(err) == "<ExceptionInfo ExceptionRAPDU(status=27012, data=b'Invalid message') tblen=8>")
             part += 1
@@ -466,7 +466,7 @@ class Test_ARBITRARY():
         part = 0
         # Send the APDU and check the results
         with pytest.raises(ExceptionRAPDU) as err:
-            with client.sign_tx(path, cfg["curve"], bytes.fromhex(cfg["tx"]), cfg["hash"], "arbitrary"):
+            with client.sign_tx(path=path, curve=cfg["curve"], transaction=bytes.fromhex(cfg["tx"]), hash_t=cfg["hash"], hint="arbitrary"):
                 pass
         assert(str(err) == "<ExceptionInfo ExceptionRAPDU(status=27012, data=b'Unexpected script') tblen=8>")
 
