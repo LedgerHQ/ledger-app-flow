@@ -175,7 +175,9 @@ export default class FlowApp {
       errorMessage: "Result not initialized",
     }
 
+    console.log("total chunks: ", chunks.length)
     for (let i = 0; i < chunks.length; i += 1) {
+      console.log("sending chunk of index: ", i)
       const payloadType = chunks[i].type
       const p2 = chunks[i].p2
       const chunk = chunks[i].buffer
@@ -187,6 +189,7 @@ export default class FlowApp {
           const errorCodeData = response.slice(-2);
           const returnCode = errorCodeData[0] * 256 + errorCodeData[1];
           const errorMessage = errorCodeToString(returnCode);
+          console.log("chunk ", i, " received code: ", returnCode, "error message: ", errorMessage)
 
           // these error codes contain detailed error description in the response
           if (returnCode === 0x6a80 || returnCode === 0x6984) {
