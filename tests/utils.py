@@ -104,7 +104,7 @@ def util_set_slot(
     """ Function to Set Slot parameters """
 
     # Send the APDU (Asynchronous)
-    with client.set_slot(slot=slot, address=address, path=path, curve=curve, hash_t=hash_t):
+    with client.set_slot(slot=slot, address=address, path=path, crypto_options=crypto_options):
         util_navigate(firmware, navigator, test_name, "APPROVE_SLOT")
 
     # Check the status (Asynchronous)

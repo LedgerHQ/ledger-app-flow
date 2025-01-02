@@ -231,7 +231,6 @@ class FlowCommandSender:
     @contextmanager
     def sign_tx(
         self,
-        *,
         path: str,
         crypto_options: CryptoOptions,
         transaction: bytes,
