@@ -10,7 +10,7 @@
 
 This repository contains:
 
-- Ledger Nano S/Nano X/Nano SPlus/STAX BOLOS app
+- Ledger Nano S/Nano X/Nano SPlus/STAX/FLEX BOLOS app
 - Specs / Documentation
 - Ledger ragger tests
 
@@ -51,13 +51,20 @@ make
 make BOLOS_SDK=$NANOX_SDK
 make BOLOS_SDK=$NANOSP_SDK
 make BOLOS_SDK=$STAX_SDK
+make BOLOS_SDK=$FLEX_SDK
 ```
 
-Stax app can be compiled in DEBUG mode for debugging purposes
+Stax and flex app can be compiled in DEBUG mode for debugging purposes
 ```shell
 make BOLOS_SDK=$STAX_SDK DEBUG=1
 ```
 Note, that it is possible (although unlikely) for ledger to make a braking change in ledger-app-dev-tools:latest. 
+
+Note, that the build by default builds a build with captions showing that it is a demo app. To replace the captions with correct ones one should use e.g.
+
+```shell
+make BOLOS_SDK=$STAX_SDK PRODUCTION_BUILD=1
+```
 
 #### Tests
 
@@ -71,6 +78,7 @@ pytest tests/ --tb=short -v --device nanos
 pytest tests/ --tb=short -v --device nanox
 pytest tests/ --tb=short -v --device nanosp
 pytest tests/ --tb=short -v --device stax
+pytest tests/ --tb=short -v --device flex
 ```
 
 Note that in case ledger-app-dev-tools:latest is updated there is a chance that slight changes in gui happen. In that case it is necessary to re-generate the snapshots, e.g.
@@ -99,6 +107,7 @@ make scan-build
 make scan-build BOLOS_SDK=$NANOX_SDK
 make scan-build BOLOS_SDK=$NANOSP_SDK
 make scan-build BOLOS_SDK=$STAX_SDK
+make scan-build BOLOS_SDK=$FLEX_SDK
 ```
 
 ## Further information
@@ -203,8 +212,9 @@ You can choose which device to compile and load for by setting the `BOLOS_SDK` e
 - `BOLOS_SDK=$NANOX_SDK`
 - `BOLOS_SDK=$NANOSP_SDK`
 - `BOLOS_SDK=$STAX_SDK`
+- `BOLOS_SDK=$FLEX_SDK`
 
-For Stax device you can compile 
+For Stax and FLEX device you can compile 
 ```shell
 make BOLOS_SDK=$STAX_SDK DEBUG=1  # compile optionally with PRINTF
 ```

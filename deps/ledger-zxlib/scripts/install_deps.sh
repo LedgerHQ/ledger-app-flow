@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #*******************************************************************************
-#*   (c) 2018 Zondax GmbH
+#*   (c) 2018 - 2024 Zondax AG
 #*
 #*  Licensed under the Apache License, Version 2.0 (the "License");
 #*  you may not use this file except in compliance with the License.
@@ -21,12 +21,10 @@ case "${os_string}" in
 		sudo apt-get install libusb-1.0.0 libudev-dev
 		pip install -U setuptools
 		pip install -U --no-cache ledgerblue ecpy
-		pip install -U conan~=1.59
 		;;
 	Darwin*)
 		brew install libusb
 		pip install -U ledgerblue ecpy
-		pip install -U conan~=1.59
 		;;
 	*)
 		echo "OS not recognized"
