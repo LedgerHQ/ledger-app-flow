@@ -3,7 +3,7 @@ from application_client.flow_response_unpacker import unpack_get_version_respons
 
 from ragger.utils.misc import get_current_app_name_and_version
 
-APP_VERSION = "0.13.0"
+APP_VERSION = "0.14.0"
 
 
 class TargetId():
