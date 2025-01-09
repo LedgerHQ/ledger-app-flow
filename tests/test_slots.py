@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Tuple
 import pytest
 
-from application_client.flow_command_sender import FlowCommandSender, Errors, HashType, MAX_SLOTS
+from application_client.flow_command_sender import FlowCommandSender, Errors, HashType, MAX_SLOTS, CryptoOptions
 from application_client.flow_response_unpacker import unpack_get_slot_response
 
 from ragger.bip import CurveChoice
@@ -13,7 +13,7 @@ from ragger.firmware import Firmware
 from utils import util_set_slot, util_navigate
 
 
-def _extract_option(option: bytes) -> Tuple[CurveChoice, HashType]:
+def _extract_option(option: bytes) -> CryptoOptions:
     """ Extract curve and hash from options bytes array """
 
     hash_value = int(option[0:2])
@@ -33,7 +33,7 @@ def _extract_option(option: bytes) -> Tuple[CurveChoice, HashType]:
     else:
         raise ValueError(f'Wrong Hash "{hash_value}"')
 
-    return curve, hash_t
+    return CryptoOptions(curve, hash_t)
 
 
 def _set_slot_and_check(
@@ -42,15 +42,14 @@ def _set_slot_and_check(
         navigator: Navigator,
         test_name: Path,
         slot: int,
-        curve: CurveChoice,
-        hash_t: HashType,
+        crypto_options: CryptoOptions,
         address: str,
         path: str,
 ) -> None:
     """ Set slot content, and check back """
 
     # Send the APDU - Set slot
-    util_set_slot(client, firmware, navigator, test_name, slot, curve, hash_t, address, path)
+    util_set_slot(client, firmware, navigator, test_name, slot, crypto_options, address, path)
 
     # Send the APDU - Slot status
     response = client.get_slot_status()
@@ -64,15 +63,15 @@ def _set_slot_and_check(
 
     # Parse the response
     ret_address, ret_path, ret_option = unpack_get_slot_response(response.data)
-    ret_curve, ret_hash = _extract_option(ret_option)
+    ret_option = _extract_option(ret_option)
     print(f" Address: {ret_address}")
     print(f" Path: {ret_path}")
-    print(f" Curve: {ret_curve}")
-    print(f" Hash: {ret_hash}")
+    print(f" Curve: {ret_option.curve}")
+    print(f" Hash: {ret_option.hash_t}")
 
     # Check expected value
     assert address == ret_address
-    assert curve == ret_curve
+    assert crypto_options == ret_option
 
 
 def test_get_slot_status(backend):
@@ -115,24 +114,23 @@ def test_get_slot_accepted(firmware, backend, navigator, test_name):
     client = FlowCommandSender(backend)
     # Test parameters
     slot = 10
-    hash_t = HashType.HASH_SHA2
     address = "e467b9dd11fa00df"
     path = "m/44'/539'/513'/0/0"
-    curve = CurveChoice.Secp256k1
+    crypto_options = CryptoOptions(CurveChoice.Secp256k1, HashType.HASH_SHA2)
 
     # Send the APDU - Set slot
     part = 0
     _set_slot_and_check(
-        client, firmware, navigator, f"{test_name}/part{part}", slot, curve, hash_t, address, path
+        client, firmware, navigator, f"{test_name}/part{part}", slot, crypto_options, address, path
     )
 
     # Send the APDU - Update slot
     address = "e467b9dd11fa00de"
     path = "m/44'/539'/513'/0/1"
-    curve = CurveChoice.Nist256p1
+    crypto_options2 = CryptoOptions(CurveChoice.Nist256p1, HashType.HASH_SHA2)
     part += 1
     _set_slot_and_check(
-        client, firmware, navigator, f"{test_name}/part{part}", slot, curve, hash_t, address, path
+        client, firmware, navigator, f"{test_name}/part{part}", slot, crypto_options2, address, path
     )
 
     # Clean Slot
@@ -149,12 +147,11 @@ def test_get_slot_refused(firmware, backend, navigator, test_name):
     slot = 10
     address = "e467b9dd11fa00df"
     path = "m/44'/539'/513'/0/0"
-    curve = CurveChoice.Secp256k1
-    hash_t = HashType.HASH_SHA2
+    crypto_options = CryptoOptions(CurveChoice.Secp256k1, HashType.HASH_SHA2)
 
     # Send the APDU (Asynchronous)
     with pytest.raises(ExceptionRAPDU) as err:
-        with client.set_slot(slot, address, path, curve, hash_t):
+        with client.set_slot(slot, address, path, crypto_options):
             util_navigate(firmware, navigator, test_name, "REJECT_SLOT")
 
     # Assert we have received a refusal

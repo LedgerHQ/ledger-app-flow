@@ -1,4 +1,4 @@
-from application_client.flow_command_sender import FlowCommandSender, HashType
+from application_client.flow_command_sender import FlowCommandSender, HashType, CryptoOptions
 
 from ragger.navigator import NavIns, NavInsID
 from ragger.bip import CurveChoice
@@ -10,6 +10,7 @@ def test_app_mainmenu(firmware, backend, navigator, test_name):
     """ Check the behavior of the device main menu """
 
     client = FlowCommandSender(backend)
+    choiceIdShowAdderess = 5 if firmware.device == "stax" else 4;
 
     # Navigate in the main menu, click "View address"
     if firmware.device == "nanos":
@@ -41,10 +42,7 @@ def test_app_mainmenu(firmware, backend, navigator, test_name):
         ]
     else:
         instructions = [
-            NavInsID.USE_CASE_HOME_SETTINGS,
-            NavInsID.USE_CASE_SETTINGS_NEXT,
-            NavInsID.USE_CASE_SETTINGS_NEXT,
-            NavInsID.USE_CASE_CHOICE_CONFIRM,
+            NavIns(NavInsID.CHOICE_CHOOSE, [choiceIdShowAdderess]),
             NavInsID.USE_CASE_REVIEW_TAP,
             NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM,
             NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT
@@ -55,12 +53,11 @@ def test_app_mainmenu(firmware, backend, navigator, test_name):
                                    screen_change_before_first_instruction=False)
     
     # Send the APDU - Set slot
-    hash_t = HashType.HASH_SHA2
+    crypto_options = CryptoOptions(CurveChoice.Secp256k1, HashType.HASH_SHA2)
     address = "e467b9dd11fa00df"
     path = "m/44'/539'/513'/0/0"
-    curve = CurveChoice.Secp256k1
     part += 1
-    util_set_slot(client, firmware, navigator, f"{test_name}/part{part}", 0, curve, hash_t, address, path)
+    util_set_slot(client, firmware, navigator, f"{test_name}/part{part}", 0, crypto_options, address, path)
 
     # Navigate in the main menu, click "View address"
     if firmware.device.startswith("nano"):
@@ -80,14 +77,13 @@ def test_app_mainmenu(firmware, backend, navigator, test_name):
         ]
     else:
         instructions = [
-            NavInsID.USE_CASE_HOME_SETTINGS,
-            NavInsID.USE_CASE_SETTINGS_NEXT,
-            NavInsID.USE_CASE_SETTINGS_NEXT,
-            NavInsID.USE_CASE_CHOICE_CONFIRM,
+            NavIns(NavInsID.CHOICE_CHOOSE, [choiceIdShowAdderess]),
             NavInsID.USE_CASE_REVIEW_TAP,
             NavInsID.USE_CASE_REVIEW_TAP,
             NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM,
-            NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT
+            NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT,
+            NavInsID.USE_CASE_HOME_SETTINGS,
+            NavInsID.USE_CASE_SETTINGS_NEXT,
         ]
 
     part += 1

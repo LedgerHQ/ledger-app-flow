@@ -15,6 +15,7 @@ class TargetId():
             "nanosp": 0x33100004,
             "nanox":  0x33000004,
             "stax":   0x33200004,
+            "flex":   0x33300004,
         }
 
     def check(self, device: str, target_id: int) -> None:
