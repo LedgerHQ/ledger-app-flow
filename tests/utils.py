@@ -1,3 +1,5 @@
+from typing import List
+import re
 from pathlib import Path
 from hashlib import sha256, sha3_256
 
@@ -28,12 +30,11 @@ def _init_header(signable_type: str) -> bytes:
         pad_size = DOMAIN_TAG_LENGTH - len(MESSAGE_DOMAIN_TAG)
         hdr += bytearray([0] * pad_size).hex()
         return bytes.fromhex(hdr)
-        
-    else:
-        hdr = TX_DOMAIN_TAG.encode("utf-8").hex()
-        pad_size = DOMAIN_TAG_LENGTH - len(TX_DOMAIN_TAG)
-        hdr += bytearray([0] * pad_size).hex()
-        return bytes.fromhex(hdr)
+
+    hdr = TX_DOMAIN_TAG.encode("utf-8").hex()
+    pad_size = DOMAIN_TAG_LENGTH - len(TX_DOMAIN_TAG)
+    hdr += bytearray([0] * pad_size).hex()
+    return bytes.fromhex(hdr)
 
 
 def util_check_signature(
@@ -52,7 +53,7 @@ def util_check_signature(
     elif options.curve == CurveChoice.Secp256k1:
         ec_curve = SECP256k1
     else:
-        raise ValueError(f'Wrong Cruve "{curve}"')
+        raise ValueError(f'Wrong Cruve "{options.curve}"')
 
     # Convert hash value to get the function
     if options.hash_t == HashType.HASH_SHA2:
@@ -60,7 +61,7 @@ def util_check_signature(
     elif options.hash_t == HashType.HASH_SHA3:
         hashfunc = sha3_256
     else:
-        raise ValueError(f'Wrong Hash "{hash_t}"')
+        raise ValueError(f'Wrong Hash "{options.hash_t}"')
 
     key: VerifyingKey = VerifyingKey.from_string(public_key, ec_curve, hashfunc)
 
@@ -182,3 +183,54 @@ def util_navigate(
                                               ROOT_SCREENSHOT_PATH,
                                               test_name,
                                               timeout)
+
+
+def util_verify_name(name: str) -> None:
+    """Verify the app name, based on defines in Makefile
+
+    Args:
+        name (str): Name to be checked
+    """
+
+    name_str = []
+    lines = _read_makefile()
+    name_re = re.compile(r"^APPNAME\s?=\s?\"?(?P<val>[ a-zA-Z0-9_]+)\"?", re.I)
+    for line in lines:
+        info = name_re.match(line)
+        if info:
+            dinfo = info.groupdict()
+            name_str.append(dinfo["val"])
+    assert name in name_str
+
+
+def util_verify_version(version: str) -> None:
+    """Verify the app version, based on defines in Makefile
+
+    Args:
+        Version (str): Version to be checked
+    """
+
+    vers_dict = {}
+    vers_str = ""
+    lines = _read_makefile()
+    version_re = re.compile(r"^APPVERSION_(?P<part>\w)\s?=\s?(?P<val>\d*)", re.I)
+    for line in lines:
+        info = version_re.match(line)
+        if info:
+            dinfo = info.groupdict()
+            vers_dict[dinfo["part"]] = dinfo["val"]
+    try:
+        vers_str = f"{vers_dict['M']}.{vers_dict['N']}.{vers_dict['P']}"
+    except KeyError:
+        pass
+    assert version == vers_str
+
+
+def _read_makefile() -> List[str]:
+    """Read lines from the parent Makefile """
+
+    parent = Path(__file__).parent.parent.resolve()
+    makefile = f"{parent}/Makefile"
+    with open(makefile, "r", encoding="utf-8") as f_p:
+        lines = f_p.readlines()
+    return lines

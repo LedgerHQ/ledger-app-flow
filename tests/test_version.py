@@ -3,7 +3,7 @@ from application_client.flow_response_unpacker import unpack_get_version_respons
 
 from ragger.utils.misc import get_current_app_name_and_version
 
-APP_VERSION = "0.14.0"
+from utils import util_verify_version, util_verify_name
 
 
 class TargetId():
@@ -32,8 +32,8 @@ def test_check_name_version(backend):
     print(f" Name: {app_name}")
     print(f" Version: {version}")
     # Check expected value
-    assert app_name == "Flow"
-    assert version == APP_VERSION
+    util_verify_name(app_name)
+    util_verify_version(version)
 
 
 def test_get_app_version(firmware, backend):
@@ -55,7 +55,7 @@ def test_get_app_version(firmware, backend):
 
     # Check expected value
     TargetId().check(firmware.device, device_id)
-    assert version == APP_VERSION
+    util_verify_version(version)
 
 
 def test_get_generic(firmware, backend):
