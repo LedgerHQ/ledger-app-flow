@@ -1,5 +1,6 @@
 from enum import IntEnum, Enum
 from typing import Generator, Optional, List
+from dataclasses import dataclass
 from contextlib import contextmanager
 from bip_utils import Bip32Utils  # type: ignore[import]
 
@@ -70,6 +71,12 @@ class HashType(str, Enum):
     # SHA3-256
     HASH_SHA3 = "sha-3"
 
+@dataclass(frozen=True)
+class CryptoOptions:
+    """Stores curve and hash"""
+    curve: CurveChoice
+    hash_t: HashType
+
 
 def _pack_derivation(derivation_path: str) -> bytes:
     """ Pack derivation path in bytes """
@@ -91,33 +98,32 @@ def _pack_derivation(derivation_path: str) -> bytes:
     return path_bytes
 
 
-def _pack_crypto_option(curve: CurveChoice, hash_t: HashType) -> bytes:
+def _pack_crypto_option(crypto_options: CryptoOptions) -> bytes:
     """ Pack crypto (curve + hash) options in bytes """
 
     path_bytes: bytes = bytes()
 
-    if hash_t == HashType.HASH_SHA2:
+    if crypto_options.hash_t == HashType.HASH_SHA2:
         hash_value = 1
-    elif hash_t == HashType.HASH_SHA3:
+    elif crypto_options.hash_t == HashType.HASH_SHA3:
         hash_value = 3
     else:
-        raise ValueError(f'Wrong Hash "{hash_t}"')
+        raise ValueError(f'Wrong Hash "{crypto_options.hash_t}"')
     path_bytes += int(hash_value).to_bytes(1, byteorder='little')
 
-    if curve == CurveChoice.Nist256p1:
+    if crypto_options.curve == CurveChoice.Nist256p1:
         curve_value = 2
-    elif curve == CurveChoice.Secp256k1:
+    elif crypto_options.curve == CurveChoice.Secp256k1:
         curve_value = 3
     else:
-        raise ValueError(f'Wrong Cruve "{curve}"')
+        raise ValueError(f'Wrong Cruve "{crypto_options.curve}"')
     path_bytes += int(curve_value).to_bytes(1, byteorder='little')
 
     return path_bytes
 
 
 def _format_apdu_data(
-        curve: CurveChoice = CurveChoice.Secp256k1,
-        hash_t: HashType = HashType.HASH_SHA2,
+        crypto_options: CryptoOptions,
         path: str = "",
         address: str = "",
         slot: int = MAX_SLOTS,
@@ -135,7 +141,7 @@ def _format_apdu_data(
         # Consider empty slot, force option to 0
         data_path += int(0).to_bytes(2, 'little')
     else:
-        data_path += _pack_crypto_option(curve, hash_t)
+        data_path += _pack_crypto_option(crypto_options)
 
     return data_path
 
@@ -149,7 +155,8 @@ class FlowCommandSender:
     def get_generic(self) -> RAPDU:
         """ APDU generic version """
 
-        data_path= _format_apdu_data(address="00")
+        data_path = _format_apdu_data(CryptoOptions(CurveChoice.Secp256k1, HashType.HASH_SHA2),
+                                     address="00")
         return self.backend.exchange(cla=ClaType.CLA_GEN,
                                     ins=InsType.GENERIC,
                                     data=data_path)
@@ -182,12 +189,11 @@ class FlowCommandSender:
         slot: int,
         address: str,
         path: str,
-        curve: CurveChoice,
-        hash_t: HashType,
+        crypto_options: CryptoOptions,
     ) -> Generator[None, None, None]:
         """ APDU set slot """
 
-        data_path= _format_apdu_data(curve, hash_t, path, address, slot)
+        data_path= _format_apdu_data(crypto_options, path, address, slot)
         with self.backend.exchange_async(cla=ClaType.CLA_APP,
                                     ins=InsType.SET_SLOT,
                                     data=data_path) as response:
@@ -196,12 +202,11 @@ class FlowCommandSender:
     def get_public_key_no_confirmation(
             self,
             path: str,
-            curve: CurveChoice,
-            hash_t: HashType,
+            crypto_options: CryptoOptions,
     ) -> RAPDU:
         """ APDU get public key - no confirmation """
 
-        data_path= _format_apdu_data(curve, hash_t, path)
+        data_path= _format_apdu_data(crypto_options, path)
         return self.backend.exchange(cla=ClaType.CLA_APP,
                                     ins=InsType.GET_PUBKEY,
                                     p1=P1.P1_NO_CONFIRM,
@@ -211,12 +216,11 @@ class FlowCommandSender:
     def get_public_key_with_confirmation(
         self,
         path: str,
-        curve: CurveChoice,
-        hash_t: HashType,
+        crypto_options: CryptoOptions,
     ) -> Generator[None, None, None]:
         """ APDU get public key - with confirmation """
 
-        data_path= _format_apdu_data(curve, hash_t, path)
+        data_path= _format_apdu_data(crypto_options, path)
         with self.backend.exchange_async(cla=ClaType.CLA_APP,
                                     ins=InsType.GET_PUBKEY,
                                     p1=P1.P1_CONFIRM,
@@ -227,14 +231,13 @@ class FlowCommandSender:
     def sign_tx(
         self,
         path: str,
-        curve: CurveChoice,
+        crypto_options: CryptoOptions,
         transaction: bytes,
-        hash_t: HashType,
         hint: str = ""
     ) -> Generator[None, None, None]:
         """ APDU sign transaction """
 
-        data_path = _format_apdu_data(curve, hash_t, path)
+        data_path = _format_apdu_data(crypto_options, path)
         self.backend.exchange(cla=ClaType.CLA_APP,
                               ins=InsType.SIGN,
                               p1=P1.P1_INIT,

@@ -15,6 +15,7 @@
  ********************************************************************************/
 #pragma once
 
+#include <stdint.h>
 #include "zxerror.h"
 
 // Parses message from the buffer

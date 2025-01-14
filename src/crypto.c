@@ -21,7 +21,8 @@
 #include "zxformat.h"
 #include "zxerror.h"
 
-#if defined(TARGET_NANOS) || defined(TARGET_NANOX) || defined(TARGET_NANOS2) || defined(TARGET_STAX)
+#if defined(TARGET_NANOS) || defined(TARGET_NANOX) || defined(TARGET_NANOS2) || \
+    defined(TARGET_STAX) || defined(TARGET_FLEX)
 #include "lib_standard_app/crypto_helpers.h"
 #include "cx.h"
 

@@ -29,7 +29,7 @@ include $(BOLOS_SDK)/Makefile.defines
 APPNAME = "Flow"
 
 APPVERSION_M=0
-APPVERSION_N=13
+APPVERSION_N=14
 APPVERSION_P=0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
@@ -48,6 +48,7 @@ ICON_NANOS = icons/nanos_icon.gif
 ICON_NANOX = icons/nanox_icon.gif
 ICON_NANOSP = icons/nanox_icon.gif
 ICON_STAX = icons/stax_icon.gif
+ICON_FLEX = icons/flex_icon.png
 
 # Application allowed derivation curves.
 # Possibles curves are: secp256k1, secp256r1, ed25519 and bls12381g1
@@ -131,6 +132,11 @@ endif
 
 ifeq ($(DEBUG),1)
 DEFINES += ZEMU_LOGGING
+endif
+
+PRODUCTION_BUILD ?= 1
+ifeq ($(PRODUCTION_BUILD),1)
+DEFINES += PRODUCTION_BUILD=1
 endif
 
 #########################

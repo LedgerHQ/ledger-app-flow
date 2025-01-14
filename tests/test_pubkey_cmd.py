@@ -1,6 +1,6 @@
 import pytest
 
-from application_client.flow_command_sender import FlowCommandSender, Errors, HashType
+from application_client.flow_command_sender import FlowCommandSender, Errors, HashType, CryptoOptions
 from application_client.flow_response_unpacker import unpack_get_public_key_response
 
 from ragger.bip import calculate_public_key_and_chaincode, CurveChoice
@@ -34,7 +34,7 @@ def test_get_public_key_no_confirm(backend):
     # Send the APDU and check the results
     for path in path_list:
         for curve in curve_list:
-            _ = util_check_pub_key(client, path, curve)
+            _ = util_check_pub_key(client, path, CryptoOptions(curve, HashType.HASH_SHA2))
 
 
 def test_get_public_key_slot(firmware, backend, navigator, test_name):
@@ -46,6 +46,9 @@ def test_get_public_key_slot(firmware, backend, navigator, test_name):
     slot = 0
     curve0 = CurveChoice.Secp256k1
     curve1 = CurveChoice.Nist256p1
+    options0 = CryptoOptions(curve0, HashType.HASH_SHA2)
+    options1 = CryptoOptions(curve0, HashType.HASH_SHA3)
+    options2 = CryptoOptions(curve1, HashType.HASH_SHA2)
     address = "e467b9dd11fa00de"
     path0 = "m/44'/539'/513'/0/0"
     path1 = "m/44'/539'/513'/0/1"
@@ -53,22 +56,22 @@ def test_get_public_key_slot(firmware, backend, navigator, test_name):
     # Send the APDU and check the results
 
     # Call get_public_key when slot is empty
-    _ = util_check_pub_key(client, path0, curve0)
+    _ = util_check_pub_key(client, path0, options0)
 
     part = 0
     # Set_slot to some other path
-    util_set_slot(client, firmware, navigator, f"{test_name}/part{part}", slot, curve0, HashType.HASH_SHA2, address, path1)
+    util_set_slot(client, firmware, navigator, f"{test_name}/part{part}", slot, options0, address, path1)
 
     # Call get_public_key for different path values
     path_list = [path0, path1]
     for path in path_list:
-        _ = util_check_pub_key(client, path, curve0)
+        _ = util_check_pub_key(client, path, options0)
 
     # Call get_public_key for other path - but hashes do not match - does not matter
-    _ = util_check_pub_key(client, path1, curve0, HashType.HASH_SHA3)
+    _ = util_check_pub_key(client, path1, options1)
 
     # Call get_public_key for other path - but curves do not match - warning
-    _ = util_check_pub_key(client, path1, curve1)
+    _ = util_check_pub_key(client, path1, options2)
 
     # Clean Slot
     part += 1
@@ -83,14 +86,8 @@ class Test_EXPERT():
         client = FlowCommandSender(backend)
         # Test parameters
         test_cfg = [
-            {
-                "curve": CurveChoice.Secp256k1,
-                "hash": HashType.HASH_SHA2,
-            },
-            {
-                "curve": CurveChoice.Nist256p1,
-                "hash": HashType.HASH_SHA3,
-            },
+            CryptoOptions(CurveChoice.Secp256k1, HashType.HASH_SHA2),
+            CryptoOptions(CurveChoice.Nist256p1, HashType.HASH_SHA3),
         ]
         path = "m/44'/539'/513'/0/0"
 
@@ -99,7 +96,7 @@ class Test_EXPERT():
 
         # Send the APDU and check the results
         for cfg in test_cfg:
-            _ = util_check_pub_key(client, path, cfg["curve"], cfg["hash"])
+            _ = util_check_pub_key(client, path, cfg)
 
 
 def test_get_public_key_confirm_accepted(firmware, backend, navigator, test_name):
@@ -109,11 +106,10 @@ def test_get_public_key_confirm_accepted(firmware, backend, navigator, test_name
     client = FlowCommandSender(backend)
     # Test parameters
     path = "m/44'/539'/0'/0/0"
-    curve = CurveChoice.Secp256k1
-    hash_t = HashType.HASH_SHA2
+    options = CryptoOptions(CurveChoice.Secp256k1, HashType.HASH_SHA2)
 
     # Send the APDU (Asynchronous)
-    with client.get_public_key_with_confirmation(path, curve, hash_t):
+    with client.get_public_key_with_confirmation(path, options):
         util_navigate(firmware, navigator, test_name, "APPROVE_PUBKEY")
 
     # Check the status (Asynchronous)
@@ -123,7 +119,7 @@ def test_get_public_key_confirm_accepted(firmware, backend, navigator, test_name
     # Parse the response
     public_key = unpack_get_public_key_response(response.data)
     # Compute the reference data
-    ref_public_key, _ = calculate_public_key_and_chaincode(curve, path, OPTIONAL.CUSTOM_SEED)
+    ref_public_key, _ = calculate_public_key_and_chaincode(options.curve, path, OPTIONAL.CUSTOM_SEED)
     # Check expected value
     assert public_key == ref_public_key
 
@@ -135,12 +131,11 @@ def test_get_public_key_confirm_refused(firmware, backend, navigator, test_name)
     client = FlowCommandSender(backend)
     # Test parameters
     path = "m/44'/1'/0'/0/0"
-    curve = CurveChoice.Secp256k1
-    hash_t = HashType.HASH_SHA2
+    options = CryptoOptions(CurveChoice.Secp256k1, HashType.HASH_SHA2)
 
     # Send the APDU (Asynchronous)
     with pytest.raises(ExceptionRAPDU) as err:
-        with client.get_public_key_with_confirmation(path, curve, hash_t):
+        with client.get_public_key_with_confirmation(path, options):
             util_navigate(firmware, navigator, test_name, "REJECT_PUBKEY")
 
     # Assert we have received a refusal

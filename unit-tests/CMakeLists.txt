@@ -91,3 +91,5 @@ add_test(test_rlp test_rlp)
 add_test(test_tx_metadata test_tx_metadata)
 add_test(test_parser test_parser)
 
+add_definitions(-D__APPLE__)
+
