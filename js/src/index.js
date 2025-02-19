@@ -15,19 +15,9 @@
  *  limitations under the License.
  ******************************************************************************* */
 
-import {serializePathv1, printBIP44Path, signSendChunkv1, validateCryptoOptions} from "./helperV1";
-import {
-  CHUNK_SIZE,
-  CLA,
-  ERROR_CODE,
-  errorCodeToString,
-  getVersion,
-  INS,
-  P1_VALUES,
-  PKLEN,
-  processErrorResponse,
-  compareVersion,
-} from "./common";
+import { serializePath, validateCryptoOptions, printBIP44Path} from "./serializePath";
+import { signGetChunks, signIsLastAPDU } from "./signTransaction";
+import { CLA, compareVersion, ERROR_CODE, errorCodeToString, getVersion, INS, P1_VALUES, PKLEN, processErrorResponse } from "./common";
 
 function processGetAddrResponse(response) {
   let partialResponse = response;
@@ -72,32 +62,7 @@ export default class FlowApp {
     }
     this.transport = transport;
   }
-
-  static prepareChunks(serializedPathBuffer, message) {
-    const chunks = [];
-
-    // First chunk (only path)
-    chunks.push(serializedPathBuffer);
-
-    const messageBuffer = Buffer.from(message);
-
-    const buffer = Buffer.concat([messageBuffer]);
-    for (let i = 0; i < buffer.length; i += CHUNK_SIZE) {
-      let end = i + CHUNK_SIZE;
-      if (i > buffer.length) {
-        end = buffer.length;
-      }
-      chunks.push(buffer.slice(i, end));
-    }
-
-    return chunks;
-  }
-
-  async signGetChunks(path, options, pathSerializationVersion, message) {
-    const serializedPath = serializePathv1(path, pathSerializationVersion, options);
-    return FlowApp.prepareChunks(serializedPath, message);
-  }
-
+  
   async getVersion() {
     return getVersion(this.transport)
       .then((response) => {
@@ -158,12 +123,7 @@ export default class FlowApp {
 
   async getAddressAndPubKey(path, cryptoOptions) {
     validateCryptoOptions(cryptoOptions);
-
-    const getVersionResponse = await this.getVersion();
-    const pathSerializationVersion = (compareVersion(getVersionResponse, 0, 9, 12) <= 0) ? 0 : 1;
-
-    const serializedPath = serializePathv1(path, pathSerializationVersion, cryptoOptions);
-
+    const serializedPath = serializePath(path, cryptoOptions);
     return this.transport
       .send(CLA, INS.GET_PUBKEY, P1_VALUES.ONLY_RETRIEVE, 0, serializedPath, [0x9000])
       .then(processGetAddrResponse, processErrorResponse);
@@ -171,53 +131,107 @@ export default class FlowApp {
 
   async showAddressAndPubKey(path, cryptoOptions) {
     validateCryptoOptions(cryptoOptions);
-
-    const getVersionResponse = await this.getVersion();
-    const pathSerializationVersion = (compareVersion(getVersionResponse, 0, 9, 12) <= 0) ? 0 : 1;
-
-    const serializedPath = serializePathv1(path, pathSerializationVersion, cryptoOptions);
+    const serializedPath = serializePath(path, cryptoOptions);
 
     return this.transport
       .send(CLA, INS.GET_PUBKEY, P1_VALUES.SHOW_ADDRESS_IN_DEVICE, 0, serializedPath, [0x9000])
       .then(processGetAddrResponse, processErrorResponse);
   }
 
-  async signSendChunk(chunkIdx, chunkNum, chunk) {
-    return signSendChunkv1(this, chunkIdx, chunkNum, chunk);
+  async sign(path, message, cryptoOptions, scriptHash) {
+    return this._signImplementation(path, message, cryptoOptions, scriptHash)
   }
 
-  async sign(path, message, cryptoOptions) {
+  async signMessage(path, message, cryptoOptions) {
+    return this._signImplementation(path, message, cryptoOptions, "Sign message")
+  }
+
+  async _signImplementation(path, message, cryptoOptions, extraInfo) {
     validateCryptoOptions(cryptoOptions);
-
     const getVersionResponse = await this.getVersion();
-    const pathSerializationVersion = (compareVersion(getVersionResponse, 0, 9, 12) <= 0) ? 0 : 1;
+    if (compareVersion(getVersionResponse, 0, 12, 0) < 0) {
+      return {
+        errorMessage: "Ledger version not supported",
+        returnCode: 4,
+        publicKey: null,
+        address: null,          
+      }      
+    }
+    const chunks = signGetChunks(path, cryptoOptions, message, extraInfo)
 
-    return this.signGetChunks(path, cryptoOptions, pathSerializationVersion, message).then((chunks) => {
-        return this.signSendChunk(1, chunks.length, chunks[0]).then(async (response) => {
-        let result = {
-          returnCode: response.returnCode,
-          errorMessage: response.errorMessage,
-          signatureCompact: null,
-          signatureDER: null,
-        };
+    if (typeof chunks === "string") {
+      return {
+        signatureCompact: null,
+        signatureDER: null,
+        returnCode: 0xffff,
+        errorMessage: chunks,
+      }
+    }
 
-        for (let i = 1; i < chunks.length; i += 1) {
-          // eslint-disable-next-line no-await-in-loop
-          result = await this.signSendChunk(1 + i, chunks.length, chunks[i]);
-          if (result.returnCode !== ERROR_CODE.NoError) {
-            break;
+    let result = {
+      signatureCompact: null,
+      signatureDER: null,
+      returnCode: 0xffff,
+      errorMessage: "Result not initialized",
+    }
+
+    for (let i = 0; i < chunks.length; i += 1) {
+      const payloadType = chunks[i].type
+      const p2 = chunks[i].p2
+      const chunk = chunks[i].buffer
+
+      // eslint-disable-next-line no-await-in-loop
+      result = await this.transport
+        .send(CLA, INS.SIGN, payloadType, p2, chunk, [0x9000, 0x6984, 0x6a80])
+        .then((response) => {
+          const errorCodeData = response.slice(-2);
+          const returnCode = errorCodeData[0] * 256 + errorCodeData[1];
+          const errorMessage = errorCodeToString(returnCode);
+
+          // these error codes contain detailed error description in the response
+          if (returnCode === 0x6a80 || returnCode === 0x6984) {
+            const detailedErrorMessage = `${errorMessage} : ${response.slice(0, response.length - 2).toString("ascii")}`;
+            return {
+              signatureCompact: null,
+              signatureDER: null,
+              returnCode: returnCode,
+              errorMessage: detailedErrorMessage,
+            };
           }
-        }
 
-        return {
-          returnCode: result.returnCode,
-          errorMessage: result.errorMessage,
-          // ///
-          signatureCompact: result.signatureCompact,
-          signatureDER: result.signatureDER,
-        };
-      }, processErrorResponse);
-    }, processErrorResponse);
+          // last APDU, everything OK
+          if (returnCode == 0x9000 && signIsLastAPDU(payloadType)) {
+            const signatureCompact = response.slice(0, 65);
+            const signatureDER = response.slice(65, response.length - 2);
+            return {
+              signatureCompact,
+              signatureDER,
+              returnCode: returnCode,
+              errorMessage: errorMessage,
+            };  
+          }    
+
+          // Here return code should be 0x9000 as for error codes other than [0x9000, 0x6984, 0x6a80] send throws
+          return {
+            signatureCompact: null,
+            signatureDER: null,
+            returnCode: returnCode,
+            errorMessage: errorMessage,
+          };
+        }, processErrorResponse);
+        
+      // If any error accours we do not send further APDUs
+      if (result.returnCode !== ERROR_CODE.NoError) {
+        break;
+      }
+    }
+
+    return {
+      returnCode: result.returnCode,
+      errorMessage: result.errorMessage,
+      signatureCompact: result.signatureCompact,
+      signatureDER: result.signatureDER,
+    };
   }
 
   async slotStatus() {
@@ -273,10 +287,7 @@ export default class FlowApp {
     const serializedSlotIdx = Buffer.from([slotIdx]);
     const serializedAccount = Buffer.from(account, "hex");
   
-    const getVersionResponse = await this.getVersion();
-    const pathSerializationVersion = (compareVersion(getVersionResponse, 0, 9, 12) <= 0) ? 0 : 1;
-
-    const serializedPath = serializePathv1(path, pathSerializationVersion, cryptoOptions);
+    const serializedPath = serializePath(path, cryptoOptions);
 
     if (serializedAccount.length !== 8) {
       return {
